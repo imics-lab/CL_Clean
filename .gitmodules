@@ -1,0 +1,3 @@
+[submodule "CL-HAR"]
+	path = CL-HAR
+	url = git@github.com:Tian0426/CL-HAR.git
