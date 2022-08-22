@@ -4,6 +4,8 @@
 
 #Run our 3 experiments on all datasets
 
+CLEANUP = True
+
 #Dataset are returned in channels-last format
 datasets = {
     'unimib' :  unimib_load_dataset,
@@ -11,3 +13,8 @@ datasets = {
     'uci har' : uci_har_load_dataset,
     'sussex huawei' : sh_loco_load_dataset
 }
+
+if __name__ == '__main__':
+    pass
+    if CLEANUP:
+        pass
