@@ -1,0 +1,15 @@
+#Author: Gentry Atkinson
+#Organization: Texas State University
+#Data: 18 Aug, 2022
+#
+#Testing CL for Label Cleaning
+
+#Experimental Design:
+#   -add Noise Competely at Random to datasets
+#   -extract features using 7 feature extractors: traditional, autoencoder, simclr+CNN, simclr+T, nnclr+CNN, nnclr+T
+#   -Fit neural models to the feature sets
+#   -Calculate a true error rate for all 7 models
+
+#Hypothesis:
+#   Null: contrastive learning will have the same true error rate as AE and trad in the presence of NCAR
+#   Alternative: models using CL will have lower TER
