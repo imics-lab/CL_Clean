@@ -5,7 +5,7 @@
 #Testing CL for Label Cleaning
 
 #Experimental Design:
-#   -add Noise Competely at Random to datasets
+#   -add Noise Competely at Random to one dataset
 #   -extract features using 7 feature extractors: traditional, autoencoder, simclr+CNN, simclr+T, nnclr+CNN, nnclr+T
 #   -predict using KNN following the technique of Experiment 1
 #   -follow a cycle of relabeling followed by repredicting until stasis
@@ -16,3 +16,12 @@
 #Hypothesis:
 #   Null: cleaning using CL will have no impact on downstream training
 #   Alternative: cleaning using CL will positively impact downstream models
+
+import torch
+from torch import Tensor
+
+def exp_3(
+    X : Tensor,
+    y : Tensor,
+):
+    pass
