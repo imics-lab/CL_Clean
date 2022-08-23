@@ -4,7 +4,10 @@
 
 #Run our 3 experiments on all datasets
 
-CLEANUP = True
+from cleanup import cleanup
+from load_data_time_series.HAR.e4_wristband_Nov2019 import e4_load_dataset
+
+CLEANUP = False
 
 #Dataset are returned in channels-last format
 datasets = {
@@ -15,7 +18,11 @@ datasets = {
 }
 
 if __name__ == '__main__':
+    """
+    Run each experiment on each dataset, so... 12?
+    """
+
     for set in datasets.keys():
         print (f"###   Running {set} ### ")
-    if CLEANUP:
-        pass
+        if CLEANUP:
+            cleanup()
