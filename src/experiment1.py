@@ -26,7 +26,7 @@ def exp_1(
     X_train : np.ndarray,
     y_train : np.ndarray,
     X_test : np.ndarray,
-    y_test : np.ndarray
-
+    y_test : np.ndarray,
+    set: str
 ):
     pass

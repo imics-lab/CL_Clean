@@ -32,7 +32,12 @@ def channel_swap(X : np.ndarray) -> np.ndarray:
     assert X.ndim == 3, "Data must be 3-dimensional to channel swap"
     return np.reshape(X, (X.shape[0], X.shape[2], X.shape[1]))
 
-def run_and_write(exp: function, X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray, filename: str) -> None:
+def run_and_write(exp: function, X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray, set: str, filename: str) -> None:
+    """
+    Open the resutlts file
+    Run one experiment on one dataset
+    Add the new results to the file
+    """
     results = exp(X_train, y_train, X_test, y_test)
     results = pd.DataFrame.from_dict(results)
     results.to_csv(filename)
@@ -50,8 +55,14 @@ if __name__ == '__main__':
         X_train, y_train, X_test, y_test = datasets[set]()
 
         ### Channels first and flatten labels
+        X_train = channel_swap(X_train)
+        X_test = channel_swap(X_test)
 
-        ### Run and Write 
+        y_train = np.argmax(y_train, axis=-1)
+        y_test = np.argmax(y_test, axis=-1)
+
+        ### Run and Write
+         
 
 
         if CLEANUP:
