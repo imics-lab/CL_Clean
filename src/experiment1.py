@@ -19,10 +19,14 @@
 
 import torch
 from torch import Tensor
+import numpy as np
 from src.utils.add_nar import add_nar
 
 def exp_1(
-    X : Tensor,
-    y : Tensor,
+    X_train : np.ndarray,
+    y_train : np.ndarray,
+    X_test : np.ndarray,
+    y_test : np.ndarray
+
 ):
     pass

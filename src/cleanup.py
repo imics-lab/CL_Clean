@@ -10,6 +10,5 @@ locations = [
     "temp/"
 ]
 
-def cleanup(){
+def cleanup():
     pass
-}

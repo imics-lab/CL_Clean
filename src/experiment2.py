@@ -15,10 +15,14 @@
 #   Alternative: models using CL will have lower TER
 
 import torch
+import numpy as np
 from torch import Tensor
 
 def exp_2(
-    X : Tensor,
-    y : Tensor,
+    X_train : np.ndarray,
+    y_train : np.ndarray,
+    X_test : np.ndarray,
+    y_test : np.ndarray
+,
 ):
     pass
