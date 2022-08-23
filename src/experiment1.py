@@ -17,16 +17,31 @@
 #   Null: contrastive learning will be no more likely to identify the correct label of data than AE or traditional
 #   Alternative: labels predicted using CL will be more likely to match the true class
 
+import imp
 import torch
 from torch import Tensor
 import numpy as np
-from src.utils.add_nar import add_nar
+from utils.add_nar import add_nar_from_array
+from ..CL_HAR.models import backbones, attention, frameworks
 
 def exp_1(
-    X_train : np.ndarray,
-    y_train : np.ndarray,
-    X_test : np.ndarray,
-    y_test : np.ndarray,
-    set: str
-):
-    pass
+        X_train : np.ndarray,
+        y_train : np.ndarray,
+        X_test : np.ndarray,
+        y_test : np.ndarray,
+        set: str
+    ) -> dict:
+    """
+    Run the experiment described on one train/test set.
+    Return a dict with 7 rows of results
+    """
+
+    results = {
+        'set' : [],
+        'features' : [],
+        'P(mispred)' : [],
+        'P(mispred|correct)' : [],
+        'P(mispred|incorrect)' : [],
+        'P(pred label = class)' : []
+    }
+
