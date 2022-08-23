@@ -15,6 +15,7 @@ datasets = {
 }
 
 if __name__ == '__main__':
-    pass
+    for set in datasets.keys():
+        print (f"###   Running {set} ### ")
     if CLEANUP:
         pass

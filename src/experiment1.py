@@ -19,6 +19,7 @@
 
 import torch
 from torch import Tensor
+from src.utils.add_nar import add_nar
 
 def exp_1(
     X : Tensor,
