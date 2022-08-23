@@ -92,6 +92,12 @@ def calc_bias_metrics(base_fpr, base_fnr, fpr, fnr):
     #we should use my hand-coded variance, or mse
     return my_special_variance(points), dis_from_sym(points)
 
+def to_single_channel(X: np.ndarray) -> np.ndarray:
+    """
+    Reduce one X set to a single channel
+    """
+    return np.array([np.linalg.norm(i, axis=1) for i in X])
+
 def get_normalized_signal_energy(X):
     return np.mean(np.square(X))
 
