@@ -23,14 +23,14 @@ import os
 from torch import Tensor
 import numpy as np
 from utils.add_nar import add_nar_from_array
-from utils.ts_feature_toolkit import get_features_for_set
+from model_wrappers import Engineered_Features
 from sklearn.neighbors import KNeighborsClassifier
 
 K = 5
 WRITE_FEATURES = False
 
 feature_learners = {
-    "traditional" : get_features_for_set
+    "traditional" : Engineered_Features
 }
 
 results = {
@@ -72,7 +72,9 @@ def exp_1(
         if os.path.exists(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy'):
             f_train = np.load(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy')
         else:
-            f_train = feature_learners[extractor](X_train, y=y_train_low)
+            f_learner = feature_learners[extractor](X_train, y=y_train_low)
+            f_learner.fit(X_train, y_train_low)
+            f_train = f_learner.get_features(X_train)
             f = open(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', 'wb+')
             if WRITE_FEATURES: np.save(f, f_train)
             f.close()
@@ -80,7 +82,7 @@ def exp_1(
         if os.path.exists(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy'):
             f_test = np.load(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy')
         else:
-            f_test = feature_learners[extractor](X_test, y=y_test_low)
+            f_test = f_learner.get_features(X_test)
             f = open(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', 'wb+')
             if WRITE_FEATURES: np.save(f, f_test)
             f.close()
@@ -104,8 +106,8 @@ def exp_1(
         count_lab_equals_class = 0
         count_cor = 0
         count_inc = 0
-        for i in range(len(y_pred)):
-            
+        
+        for i in range(len(y_pred)): 
             #Mislabeled
             if y_test_low[i] != y_test[i]:
                 count_inc += 1
