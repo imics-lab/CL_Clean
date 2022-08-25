@@ -5,6 +5,7 @@
 #Run our 3 experiments on all datasets
 
 from typing import Callable
+from datetime import datetime
 from cleanup import cleanup
 from load_data_time_series.HAR.e4_wristband_Nov2019.e4_load_dataset import e4_load_dataset
 from load_data_time_series.HAR.UniMiB_SHAR.unimib_shar_adl_load_dataset import unimib_load_dataset
@@ -22,9 +23,9 @@ CLEANUP = False
 #Dataset are returned in channels-last format
 datasets = {
     'unimib' :  unimib_load_dataset,
-    'twister' : e4_load_dataset,
-    'uci har' : uci_har_load_dataset,
-    'sussex huawei' : sh_loco_load_dataset
+    #'twister' : e4_load_dataset,
+    #'uci har' : uci_har_load_dataset,
+    #'sussex huawei' : sh_loco_load_dataset
 }
 
 def channel_swap(X : np.ndarray) -> np.ndarray:
@@ -55,12 +56,13 @@ if __name__ == '__main__':
     """
     Run each experiment on each dataset, so... 12?
     """
+    NOW = datetime.now()
 
     for set in datasets.keys():
         print (f"###   Running {set} ### ")
         
         ### Fetch Dataset ###
-        X_train, y_train, X_test, y_test = datasets[set]()
+        X_train, y_train, X_test, y_test = datasets[set](incl_xyz_accel=True, incl_rms_accel=False)
 
         ### Channels first and flatten labels
         X_train = channel_swap(X_train)
@@ -70,7 +72,7 @@ if __name__ == '__main__':
         y_test = np.argmax(y_test, axis=-1)
 
         ### Run and Write
-         
+        run_and_write(exp_1, X_train, y_train, X_test, y_test, set, "results/exp1_results_{}.csv".format(NOW))
 
 
         if CLEANUP:

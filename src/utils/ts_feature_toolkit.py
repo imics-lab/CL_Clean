@@ -182,9 +182,13 @@ Parameters:
     num_instances: the number of instances in the set
 Returns: the extracted feature set as a 2D array
 """
-def get_features_for_set(X, sample_rate=50, num_instances=None):
+def get_features_for_set(X, sample_rate=50, y=None, num_instances=None):
+    #y is only passed in for consistency with other feature extractors
     print("Feature extraction for set with shape: ", X.shape)
-    sample_length = len(X[0])
+    if X.ndim == 3 and X.shape[1]!=1:
+        print("Flattening")
+        X = to_single_channel(X)
+    #sample_length = len(X[0])
     if num_instances is None:
         num_instances = len(X)
     fet = np.zeros((num_instances, 18))
