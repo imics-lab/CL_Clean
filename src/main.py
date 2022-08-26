@@ -24,7 +24,7 @@ CLEANUP = True
 datasets = {
     'unimib' :  unimib_load_dataset,
     #'twister' : e4_load_dataset,
-    #'uci har' : uci_har_load_dataset,
+    'uci har' : uci_har_load_dataset,
     #'sussex huawei' : sh_loco_load_dataset
 }
 
@@ -44,11 +44,11 @@ def run_and_write(exp: Callable, X_train: np.ndarray, y_train: np.ndarray, X_tes
     results = exp(X_train, y_train, X_test, y_test, set)
     results = pd.DataFrame.from_dict(results)
     if not os.path.exists(filename):      
-        results.to_csv(filename)
+        results.to_csv(filename, index=False)
     else:
         file_frame = pd.read_csv(filename)
-        file_frame.append(results)
-        file_frame.to_csv(filename)
+        file_frame = pd.concat([file_frame, results])
+        file_frame.to_csv(filename, index=False)
 
 
 

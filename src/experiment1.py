@@ -33,16 +33,7 @@ feature_learners = {
     "traditional" : Engineered_Features
 }
 
-results = {
-    'set' : [],
-    'features' : [],
-    'noise percent' : [],
-    'number mislabeled' : [],
-    'P(mispred)' : [],
-    'P(mispred|correct)' : [],
-    'P(mispred|incorrect)' : [],
-    'P(pred label = class)' : []
-}
+
 
 
 def exp_1(
@@ -56,6 +47,18 @@ def exp_1(
     Run the experiment described on one train/test set.
     Return a dict with 7 rows of results
     """
+
+    results = {
+        'set' : [],
+        'features' : [],
+        'noise percent' : [],
+        'number mislabeled' : [],
+        'P(mispred)' : [],
+        'P(mispred|correct)' : [],
+        'P(mispred|incorrect)' : [],
+        'P(pred label = class)' : []
+    }
+
     print ("Running Experiment 1 with K=", K, " on ", set)
     print("Feature Extractors: ", ', '.join(feature_learners.keys()))
 
