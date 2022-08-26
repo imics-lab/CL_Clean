@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 import os
 
-CLEANUP = False
+CLEANUP = True
 
 #Dataset are returned in channels-last format
 datasets = {

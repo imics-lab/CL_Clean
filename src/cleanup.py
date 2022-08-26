@@ -11,4 +11,7 @@ locations = [
 ]
 
 def cleanup():
-    pass
+    for directory in locations:
+        files = os.listdir(directory)
+        for f in files:
+            os.remove(f'{directory}{f}')
