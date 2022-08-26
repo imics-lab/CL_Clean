@@ -29,3 +29,71 @@ class Conv_Autoencoder(nn.Module):
         self.conv2 = nn.LazyConv1d(out_channels=EMBEDDING_WIDTH, kernel_size=8, padding_mode='zeros')
         self.pool = nn.MaxPool1d(kernel_size=X[0].shape[1])
         self.embedding = nn.LazyLinear(out_features=EMBEDDING_WIDTH)
+
+    def fit(self, X, y=None) -> None:
+        pass
+
+    def get_features(self, X) -> np.ndarray:
+        pass
+
+
+class SimCLR(nn.Module):
+    def __init__(self, X, backbone='CNN') -> None:
+        super(SimCLR, self).__init__()
+
+    def fit(self, X, y=None) -> None:
+        pass
+
+    def get_features(self, X) -> np.ndarray:
+        pass
+
+class SimCLR_C(SimCLR):
+    def __init__(self, X) -> None:
+        super(SimCLR_C, self).__init__(X, 'CNN')
+
+    def fit(self, X, y=None) -> None:
+        pass
+
+    def get_features(self, X) -> np.ndarray:
+        pass
+
+class SimCLR_T(SimCLR):
+    def __init__(self, X) -> None:
+        super(SimCLR_C, self).__init__(X, 'Transformer')
+
+    def fit(self, X, y=None) -> None:
+        pass
+
+    def get_features(self, X) -> np.ndarray:
+        pass
+
+class NNCLR(nn.Module):
+    def __init__(self, X, backbone='CNN') -> None:
+        super(NNCLR, self).__init__()
+
+    def fit(self, X, y=None) -> None:
+        pass
+
+    def get_features(self, X) -> np.ndarray:
+        pass
+
+class NNCLR_C(nn.Module):
+    def __init__(self, X) -> None:
+        super(NNCLR_C, self).__init__(X, 'CNN')
+
+    def fit(self, X, y=None) -> None:
+        pass
+
+    def get_features(self, X) -> np.ndarray:
+        pass
+
+class NNCLR_T(nn.Module):
+    def __init__(self, X) -> None:
+        super(NNCLR_T, self).__init__(X, 'Transformer')
+
+    def fit(self, X, y=None) -> None:
+        pass
+
+    def get_features(self, X) -> np.ndarray:
+        pass
+
