@@ -78,7 +78,7 @@ def exp_1(
         
         #check storage for features and generate if necesary
         if os.path.exists(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy'):
-            f_train = np.load(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy')
+            f_train = np.load(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', allow_pickle=True)
         else:
             f_learner = feature_learners[extractor](X_train)
             f_learner.fit(X_train, y_train_low)
@@ -88,7 +88,7 @@ def exp_1(
             f.close()
 
         if os.path.exists(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy'):
-            f_test = np.load(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy')
+            f_test = np.load(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', allow_pickle=True)
         else:
             f_test = f_learner.get_features(X_test)
             f = open(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', 'wb+')
