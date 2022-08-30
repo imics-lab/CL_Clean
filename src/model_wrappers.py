@@ -13,6 +13,7 @@ from torch import nn
 from utils.ts_feature_toolkit import get_features_for_set
 from torch.utils.data import DataLoader
 import multiprocessing
+from torchsummary import summary
 
 EMBEDDING_WIDTH = 64
 
@@ -68,15 +69,16 @@ class Conv_Autoencoder():
             n_channels=X.shape[1],
             n_classes=np.max(y)+1,
             out_channels=EMBEDDING_WIDTH,
-            backbone=False
+            backbone=True
         )
         self.model = self.model.to(device)
         self.criterion =  nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
         self.patience = 7
         self.max_epochs = 200
-        self.bath_size = 32
-        
+        self.bath_size = 1
+        summary(self.model, X.shape[1:])
+
 
     def fit(self, X, y=None) -> None:
         """
@@ -96,16 +98,16 @@ class Conv_Autoencoder():
             for x0, y0 in dataloader:
                 x0 = x0.to(device)
                 x_decoded, x_encoded = self.model(x0)
-                #x_encoded is returned channels-last
-                x_encoded = x_encoded.permute(0, 2, 1)
-                loss = self.criterion(x0, x_encoded)
+                #x_decoded comes back channels last
+                x_decoded = x_decoded.permute(0, 2, 1)
+                loss = self.criterion(x0, x_decoded)
                 total_loss += loss.detach()
                 loss.backward()
                 self.optimizer.step()
                 self.optimizer.zero_grad()
                 
-            avg_loss = total_loss/len(dataloader)
-            print('Train Loss: ', avg_loss)
+            avg_loss = total_loss.detach()/len(dataloader)
+            print('Train Loss: ', avg_loss.detach())
             early_stopping(avg_loss)
             if early_stopping.early_stop:
                 print("Stopping early")
