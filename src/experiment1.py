@@ -30,7 +30,7 @@ K = 5
 WRITE_FEATURES = False
 
 feature_learners = {
-    "traditional" : Engineered_Features,
+    #"traditional" : Engineered_Features,
     "CAE" : Conv_Autoencoder,
     "SimCLR + CNN" : SimCLR_C,
     "SimCLR + T" : SimCLR_T,
@@ -75,12 +75,13 @@ def exp_1(
     #For each extractor apply the experiment with low noise labels
     for extractor in feature_learners.keys():
         print(f"## Experiment 1: Low Noise + {extractor} with {set}")
+        print("Shape of X_train in experiment 1: ", X_train.shape)
         
         #check storage for features and generate if necesary
         if os.path.exists(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy'):
             f_train = np.load(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', allow_pickle=True)
         else:
-            f_learner = feature_learners[extractor](X_train)
+            f_learner = feature_learners[extractor](X_train, y_train_low)
             f_learner.fit(X_train, y_train_low)
             f_train = f_learner.get_features(X_train)
             f = open(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', 'wb+')

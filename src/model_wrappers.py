@@ -5,16 +5,21 @@
 #Make some nice models with a common interface
 
 from pickletools import optimize
+import os
 from CL_HAR.models import backbones, frameworks, attention
 import torch
 import numpy as np
 from torch import nn
 from utils.ts_feature_toolkit import get_features_for_set
 from torch.utils.data import DataLoader
+import multiprocessing
 
 EMBEDDING_WIDTH = 64
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
+#work around for mapping error
+#torch.backends.cudnn.enabled = False
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 
 #Shameless theft: https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
@@ -55,16 +60,18 @@ class Engineered_Features():
         return get_features_for_set(X)
 
 
-class Conv_Autoencoder(nn.Module):
+class Conv_Autoencoder():
     def __init__(self, X, y) -> None:
         super(Conv_Autoencoder, self).__init__()
         self.model = backbones.CNN_AE(
-            n_channels=len(X[0]),
+            #channels first right?
+            n_channels=X.shape[1],
             n_classes=np.max(y)+1,
             out_channels=EMBEDDING_WIDTH,
             backbone=False
         )
-        self.model.to(device)
+        self.model = self.model.to(device)
+        self.criterion =  nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
         self.patience = 7
         self.max_epochs = 200
@@ -75,21 +82,28 @@ class Conv_Autoencoder(nn.Module):
         """
         Train cycle with early stopping
         """
-        dataloader = torch.utils.data.DataLoader(
-            torch.Tensor(X), batch_size = self.bath_size, shuffle=False, drop_last=True
+        torch_X = torch.Tensor(X)
+        torch_y = torch.Tensor(y)
+        dataset = torch.utils.data.TensorDataset(torch_X, torch_y)
+        dataloader = DataLoader(
+            dataset=dataset, batch_size = self.bath_size, shuffle=False, drop_last=True
         )
         early_stopping = EarlyStopping(tolerance=self.patience, min_delta=0.1)
+        self.model.to(device)
         for epoch in range(self.max_epochs):
             print("Epoch: ", epoch, end='.')
             total_loss = 0
-            for x0 in dataloader:
-                x0.to(device)
+            for x0, y0 in dataloader:
+                x0 = x0.to(device)
                 x_decoded, x_encoded = self.model(x0)
-                loss = self.criterion(x0, x_decoded)
+                #x_encoded is returned channels-last
+                x_encoded = x_encoded.permute(0, 2, 1)
+                loss = self.criterion(x0, x_encoded)
                 total_loss += loss.detach()
                 loss.backward()
                 self.optimizer.step()
                 self.optimizer.zero_grad()
+                
             avg_loss = total_loss/len(dataloader)
             print('Train Loss: ', avg_loss)
             early_stopping(avg_loss)
