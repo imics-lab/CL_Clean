@@ -72,7 +72,7 @@ class Conv_Autoencoder():
             backbone=True
         )
         self.model = self.model.to(device)
-        self.criterion =  nn.MSELoss()
+        self.criterion =  nn.BCELoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
         self.patience = 7
         self.max_epochs = 200
@@ -99,7 +99,9 @@ class Conv_Autoencoder():
                 x0 = x0.to(device)
                 x_decoded, x_encoded = self.model(x0)
                 #x_decoded comes back channels last
-                x_decoded = x_decoded.permute(0, 2, 1)
+                #x_decoded = x_decoded.permute(0, 2, 1)
+                # print(True in x0.detach() < 0)
+                # print(True in x0.detach() > 1)
                 loss = self.criterion(x0, x_decoded)
                 total_loss += loss.detach()
                 loss.backward()
