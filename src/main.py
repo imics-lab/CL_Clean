@@ -6,6 +6,7 @@
 
 from typing import Callable
 from datetime import datetime
+from sklearn.preprocessing import MinMaxScaler
 from cleanup import cleanup
 from load_data_time_series.HAR.e4_wristband_Nov2019.e4_load_dataset import e4_load_dataset
 from load_data_time_series.HAR.UniMiB_SHAR.unimib_shar_adl_load_dataset import unimib_load_dataset
@@ -67,6 +68,12 @@ if __name__ == '__main__':
         ### Channels first and flatten labels
         X_train = channel_swap(X_train)
         X_test = channel_swap(X_test)
+
+        ### Bound data to range -1 to 1
+        scaler = MinMaxScaler(feature_range=(-1, 1))
+        X_train = np.array([scaler.fit_transform(Xi) for Xi in X_train])
+        X_test = np.array([scaler.fit_transform(Xi) for Xi in X_test])
+
 
         y_train = np.argmax(y_train, axis=-1)
         y_test = np.argmax(y_test, axis=-1)
