@@ -77,6 +77,8 @@ class Conv_Autoencoder():
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
         self.patience = 7
         self.max_epochs = 200
+        #This started as a typo, but I like it
+        #Bath == Batch
         self.bath_size = 32
         summary(self.model, X.shape[1:])
 
@@ -127,6 +129,18 @@ class Conv_Autoencoder():
 class SimCLR(nn.Module):
     def __init__(self, X, backbone='CNN') -> None:
         super(SimCLR, self).__init__()
+        if backbone=='CNN':
+            self.model = frameworks.SimCLR(backbone='FCN')
+        elif backbone == 'Transformer':
+            self.model = frameworks.SimCLR(backbone='Transformer')
+
+        self.model = self.model.to(device)
+        self.criterion =  nn.CrossEntropyLoss()
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
+        self.patience = 7
+        self.max_epochs = 200
+        self.bath_size = 32
+        summary(self.model, X.shape[1:])
 
     def fit(self, X, y=None) -> None:
         """
@@ -140,6 +154,7 @@ class SimCLR(nn.Module):
 class SimCLR_C(SimCLR):
     def __init__(self, X) -> None:
         super(SimCLR_C, self).__init__(X, 'CNN')
+        
 
     def fit(self, X, y=None) -> None:
         pass
