@@ -7,6 +7,7 @@
 from pickletools import optimize
 import os
 from CL_HAR.models import backbones, frameworks, attention
+from CL_HAR import trainer
 import torch
 import numpy as np
 from torch import nn
@@ -17,7 +18,7 @@ from torchsummary import summary
 
 EMBEDDING_WIDTH = 64
 
-device = "cpu" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 #work around for mapping error
 #torch.backends.cudnn.enabled = False
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
