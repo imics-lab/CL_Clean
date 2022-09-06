@@ -36,13 +36,23 @@ def channel_swap(X : np.ndarray) -> np.ndarray:
     assert X.ndim == 3, "Data must be 3-dimensional to channel swap"
     return np.reshape(X, (X.shape[0], X.shape[2], X.shape[1]))
 
-def run_and_write(exp: Callable, X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray, set: str, filename: str) -> None:
+def run_and_write(
+    exp: Callable, 
+    X_train: np.ndarray, 
+    y_train: np.ndarray,
+    X_val : np.ndarray,
+    y_val : np.ndarray, 
+    X_test: np.ndarray, 
+    y_test: np.ndarray, 
+    set: str, 
+    filename: str
+) -> None:
     """
     Open the resutlts file
     Run one experiment on one dataset
     Add the new results to the file
     """
-    results = exp(X_train, y_train, X_test, y_test, set)
+    results = exp(X_train, y_train, X_val, y_val, X_test, y_test, set)
     results = pd.DataFrame.from_dict(results)
     if not os.path.exists(filename):      
         results.to_csv(filename, index=False)
@@ -84,10 +94,10 @@ if __name__ == '__main__':
 
         ### Bound data to range -1 to 1
         scaler = MinMaxScaler(feature_range=(-1, 1))
-        scaler.fit(X_train)
-        X_train = np.array([scaler.transform(Xi) for Xi in X_train])
-        X_val = np.array([scaler.transform(Xi) for Xi in X_val])
-        X_test = np.array([scaler.transform(Xi) for Xi in X_test])
+        #scaler.fit(X_train)
+        X_train = np.array([scaler.fit_transform(Xi) for Xi in X_train])
+        X_val = np.array([scaler.fit_transform(Xi) for Xi in X_val])
+        X_test = np.array([scaler.fit_transform(Xi) for Xi in X_test])
 
         ### Run and Write Experiments
         run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}.csv".format(NOW))

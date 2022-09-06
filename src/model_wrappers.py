@@ -15,7 +15,7 @@ from utils.ts_feature_toolkit import get_features_for_set
 from torch.utils.data import DataLoader
 import multiprocessing
 from torchsummary import summary
-from CL_HAR.utils import logger
+from CL_HAR.utils import _logger
 import fitlog
 
 EMBEDDING_WIDTH = 64
@@ -70,7 +70,7 @@ class Conv_Autoencoder():
         self.model = backbones.CNN_AE(
             #channels first right?
             n_channels=X.shape[1],
-            n_classes=np.max(y)+1,
+            n_classes=np.nanmax(y)+1,
             out_channels=EMBEDDING_WIDTH,
             backbone=True
         )
@@ -128,10 +128,14 @@ class Conv_Autoencoder():
 
 
 class SimCLR(nn.Module):
-    def __init__(self, X, backbone='CNN') -> None:
+    def __init__(self, X, y=None, backbone='CNN') -> None:
         super(SimCLR, self).__init__()
         if backbone=='CNN':
-            self.model = frameworks.SimCLR(backbone='FCN')
+            self.model = frameworks.SimCLR(backbone=backbones.FCN(
+                n_channels=X.shape[1],
+                n_classes=np.nanmax(y)+1,
+                out_channels=EMBEDDING_WIDTH
+            ))
         elif backbone == 'Transformer':
             self.model = frameworks.SimCLR(backbone='Transformer')
 
@@ -141,7 +145,7 @@ class SimCLR(nn.Module):
         self.patience = 7
         self.max_epochs = 200
         self.bath_size = 32
-        summary(self.model, X.shape[1:])
+        #summary(self.model, X.shape[1:], X.shape[1:])
 
     def fit(self, X_train, y_train, X_val, y_val) -> None:
         """
@@ -166,7 +170,7 @@ class SimCLR(nn.Module):
             train_loaders=[train_dataloader],
             val_loader=[val_dataloader],
             model=self.model,
-            logger=logger('temp/simCLR_train_log.txt'),
+            logger=_logger('temp/simCLR_train_log.txt'),
             fitlog=fitlog,
             DEVICE=device,
             optimizers=self.optimizer,
@@ -179,8 +183,8 @@ class SimCLR(nn.Module):
         pass
 
 class SimCLR_C(SimCLR):
-    def __init__(self, X) -> None:
-        super(SimCLR_C, self).__init__(X, 'CNN')
+    def __init__(self, X, y=None) -> None:
+        super(SimCLR_C, self).__init__(X, y=y, backbone='CNN')
         
 
     def fit(self, X, y=None) -> None:
