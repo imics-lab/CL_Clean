@@ -14,4 +14,10 @@ def cleanup():
     for directory in locations:
         files = os.listdir(directory)
         for f in files:
-            os.remove(f'{directory}{f}')
+            try:
+                os.remove(f'{directory}{f}')
+            except:
+                sub_files = os.listdir(f'{directory}{f}')
+                for g in sub_files:
+                    os.remove(f'{directory}{f}/{g}')
+                os.rmdir(f'{directory}{f}')

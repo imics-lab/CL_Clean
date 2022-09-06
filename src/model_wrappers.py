@@ -151,7 +151,7 @@ class SimCLR(nn.Module):
         super(SimCLR, self).__init__()
         if backbone=='CNN':
             self.model = frameworks.SimCLR(backbone=backbones.FCN(
-                n_channels=X.shape[2],
+                n_channels=X.shape[1],
                 n_classes=np.nanmax(y)+1,
                 out_channels=EMBEDDING_WIDTH
             ))
