@@ -69,7 +69,7 @@ def exp_1(
     #Let's make some noise
     num_classes = np.max(y_train)+1
     y_train_low, _, y_train_high, _ = add_nar_from_array(y_train, num_classes)
-    y_val_low, _, y_val_high, _ = add_nar_from_array(y_train, num_classes)
+    y_val_low, _, y_val_high, _ = add_nar_from_array(y_val, num_classes)
     y_test_low, _, y_test_high, _ = add_nar_from_array(y_test, num_classes)
 
     #For each extractor apply the experiment with low noise labels

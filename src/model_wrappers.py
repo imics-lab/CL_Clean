@@ -4,7 +4,6 @@
 #
 #Make some nice models with a common interface
 
-from pickletools import optimize
 import os
 from CL_HAR.models import backbones, frameworks, attention
 from CL_HAR import trainer
@@ -48,7 +47,21 @@ class EarlyStopping():
                 self.early_stop = True
             self.losses = self.losses[1:]
             
-            
+class ArgHolder():
+    """
+    Arguments for CL_HAR trainer
+    """
+    def __init__(self, 
+        n_epoch : int, 
+        batch_size : int, 
+        framework : str,
+        model_name : str,
+    ):
+        self.n_epoch = n_epoch
+        self.batch_size  = batch_size
+        self.framework = framework
+        self.model_name = model_name
+        self.cases = "Just do the thing"          
 
 
 class Engineered_Features():
@@ -145,6 +158,7 @@ class SimCLR(nn.Module):
         self.patience = 7
         self.max_epochs = 200
         self.bath_size = 32
+        self.backbone = backbone
         #summary(self.model, X.shape[1:], X.shape[1:])
 
     def fit(self, X_train, y_train, X_val, y_val) -> None:
@@ -153,17 +167,26 @@ class SimCLR(nn.Module):
         """
         train_torch_X = torch.Tensor(X_train)
         train_torch_y = torch.Tensor(y_train)
+        train_torch_d = torch.zeros(y_train.shape)
         val_torch_X = torch.Tensor(X_val)
         val_torch_y = torch.Tensor(y_val)
+        val_torch_d = torch.zeros(y_val.shape)
 
-        train_dataset = torch.utils.data.TensorDataset(train_torch_X, train_torch_y)
+        train_dataset = torch.utils.data.TensorDataset(train_torch_X, train_torch_y, train_torch_d)
         train_dataloader = DataLoader(
             dataset=train_dataset, batch_size = self.bath_size, shuffle=False, drop_last=True
         )
 
-        val_dataset = torch.utils.data.TensorDataset(val_torch_X, val_torch_y)
+        val_dataset = torch.utils.data.TensorDataset(val_torch_X, val_torch_y, val_torch_d)
         val_dataloader = DataLoader(
             dataset=val_dataset, batch_size = self.bath_size, shuffle=False, drop_last=True
+        )
+
+        args = ArgHolder(
+            n_epoch=self.max_epochs,
+            batch_size=self.bath_size,
+            framework="SimCLR",
+            model_name=self.backbone
         )
 
         self.model = trainer.train(
@@ -175,7 +198,8 @@ class SimCLR(nn.Module):
             DEVICE=device,
             optimizers=self.optimizer,
             schedulers=None,
-            criterion=self.criterion
+            criterion=self.criterion,
+            args=args
         )
 
 
@@ -187,11 +211,11 @@ class SimCLR_C(SimCLR):
         super(SimCLR_C, self).__init__(X, y=y, backbone='CNN')
         
 
-    def fit(self, X, y=None) -> None:
-        pass
+    # def fit(self, X, y=None) -> None:
+    #     pass
 
-    def get_features(self, X) -> np.ndarray:
-        pass
+    # def get_features(self, X) -> np.ndarray:
+    #     pass
 
 class SimCLR_T(SimCLR):
     def __init__(self, X) -> None:
