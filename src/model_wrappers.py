@@ -56,6 +56,7 @@ class ArgHolder():
         batch_size : int, 
         framework : str,
         model_name : str,
+        criterion : str
     ):
         self.n_epoch = n_epoch
         self.batch_size  = batch_size
@@ -63,7 +64,7 @@ class ArgHolder():
         self.model_name = model_name
         self.backbone = model_name
         self.cases = ""
-        self.criterion = ""
+        self.criterion = criterion
         self.weight_decay = 1e-5
         self.aug1 = "t_flip"
         self.aug2 = "noise"          
@@ -161,7 +162,7 @@ class SimCLR(nn.Module):
         self.criterion =  nn.CrossEntropyLoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
         self.patience = 7
-        self.max_epochs = 200
+        self.max_epochs = 5
         self.bath_size = 32
         self.backbone = backbone
         #summary(self.model, X.shape[1:], X.shape[1:])
@@ -173,6 +174,7 @@ class SimCLR(nn.Module):
         train_torch_X = torch.Tensor(X_train)
         train_torch_y = torch.Tensor(y_train)
         train_torch_d = torch.zeros(train_torch_y.shape)
+
         val_torch_X = torch.Tensor(X_val)
         val_torch_y = torch.Tensor(y_val)
         val_torch_d = torch.zeros(val_torch_y.shape)
@@ -191,21 +193,25 @@ class SimCLR(nn.Module):
             n_epoch=self.max_epochs,
             batch_size=self.bath_size,
             framework="simclr",
+            criterion='NTXent',
             model_name=self.backbone
         )
+        fitlog.set_log_dir('temp')
 
-        self.model = trainer.train(
+        best_model = trainer.train(
             train_loaders=[train_dataloader],
-            val_loader=[val_dataloader],
+            val_loader=val_dataloader,
             model=self.model,
             logger=_logger('temp/simCLR_train_log.txt'),
             fitlog=fitlog,
             DEVICE=device,
             optimizers=[self.optimizer],
-            schedulers=None,
+            schedulers=[],
             criterion=self.criterion,
             args=args
         )
+        self.model.load_state_dict(best_model)
+        return
 
 
     def get_features(self, X) -> np.ndarray:

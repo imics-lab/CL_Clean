@@ -87,9 +87,9 @@ if __name__ == '__main__':
         X_test = channel_swap(X_test)
         X_val = channel_swap(X_val)
 
-        y_train = np.argmax(y_train, axis=-1)
-        y_val = np.argmax(y_val, axis=-1)
-        y_test = np.argmax(y_test, axis=-1)
+        y_train = np.array(np.argmax(y_train, axis=-1))
+        y_val = np.array(np.argmax(y_val, axis=-1))
+        y_test = np.array(np.argmax(y_test, axis=-1))
 
 
         ### Bound data to range -1 to 1
