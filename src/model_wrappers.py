@@ -151,14 +151,15 @@ class SimCLR(nn.Module):
         super(SimCLR, self).__init__()
         if backbone=='CNN':
             self.model = frameworks.SimCLR(backbone=backbones.FCN(
-                n_channels=X.shape[1],
+                n_channels=X.shape[2],
                 n_classes=np.nanmax(y)+1,
                 out_channels=EMBEDDING_WIDTH
             ))
         elif backbone == 'Transformer':
+            #len_sw = sw
             self.model = frameworks.SimCLR(backbone=backbones.Transformer(
-                n_channels=X.shape[1],
-                len_sw=8,
+                n_channels=X.shape[2],
+                len_sw=16,
                 n_classes=np.nanmax(y)+1,
                 dim=EMBEDDING_WIDTH
             ))
