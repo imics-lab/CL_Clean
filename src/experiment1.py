@@ -31,19 +31,18 @@ WRITE_FEATURES = False
 
 feature_learners = {
     #"traditional" : Engineered_Features,
-    "CAE" : Conv_Autoencoder,
+    #"CAE" : Conv_Autoencoder,
     "SimCLR + CNN" : SimCLR_C,
     "SimCLR + T" : SimCLR_T,
     "NNCLR + CNN" : NNCLR_C,
     "NNCLR + T" : NNCLR_T
 }
 
-
-
-
 def exp_1(
         X_train : np.ndarray,
         y_train : np.ndarray,
+        X_val : np.ndarray,
+        y_val : np.ndarray,
         X_test : np.ndarray,
         y_test : np.ndarray,
         set: str
@@ -70,6 +69,7 @@ def exp_1(
     #Let's make some noise
     num_classes = np.max(y_train)+1
     y_train_low, _, y_train_high, _ = add_nar_from_array(y_train, num_classes)
+    y_val_low, _, y_val_high, _ = add_nar_from_array(y_train, num_classes)
     y_test_low, _, y_test_high, _ = add_nar_from_array(y_test, num_classes)
 
     #For each extractor apply the experiment with low noise labels
@@ -82,7 +82,7 @@ def exp_1(
             f_train = np.load(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', allow_pickle=True)
         else:
             f_learner = feature_learners[extractor](X_train, y_train_low)
-            f_learner.fit(X_train, y_train_low)
+            f_learner.fit(X_train, y_train_low, X_val, y_val_low)
             f_train = f_learner.get_features(X_train)
             f = open(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', 'wb+')
             if WRITE_FEATURES: np.save(f, f_train)
