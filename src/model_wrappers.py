@@ -61,7 +61,12 @@ class ArgHolder():
         self.batch_size  = batch_size
         self.framework = framework
         self.model_name = model_name
-        self.cases = "Just do the thing"          
+        self.backbone = model_name
+        self.cases = ""
+        self.criterion = ""
+        self.weight_decay = 1e-5
+        self.aug1 = "t_flip"
+        self.aug2 = "noise"          
 
 
 class Engineered_Features():
@@ -167,10 +172,10 @@ class SimCLR(nn.Module):
         """
         train_torch_X = torch.Tensor(X_train)
         train_torch_y = torch.Tensor(y_train)
-        train_torch_d = torch.zeros(y_train.shape)
+        train_torch_d = torch.zeros(train_torch_y.shape)
         val_torch_X = torch.Tensor(X_val)
         val_torch_y = torch.Tensor(y_val)
-        val_torch_d = torch.zeros(y_val.shape)
+        val_torch_d = torch.zeros(val_torch_y.shape)
 
         train_dataset = torch.utils.data.TensorDataset(train_torch_X, train_torch_y, train_torch_d)
         train_dataloader = DataLoader(
@@ -185,7 +190,7 @@ class SimCLR(nn.Module):
         args = ArgHolder(
             n_epoch=self.max_epochs,
             batch_size=self.bath_size,
-            framework="SimCLR",
+            framework="simclr",
             model_name=self.backbone
         )
 
@@ -196,7 +201,7 @@ class SimCLR(nn.Module):
             logger=_logger('temp/simCLR_train_log.txt'),
             fitlog=fitlog,
             DEVICE=device,
-            optimizers=self.optimizer,
+            optimizers=[self.optimizer],
             schedulers=None,
             criterion=self.criterion,
             args=args
