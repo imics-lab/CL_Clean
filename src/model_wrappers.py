@@ -250,7 +250,7 @@ class SimCLR_T(SimCLR):
         else:
             fet = fet.cpu().detach().numpy()
 
-        return np.nanmax(fet, axis=-1)
+        return fet
 
 class NNCLR(nn.Module):
     def __init__(self, X, backbone='CNN') -> None:

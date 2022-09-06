@@ -32,7 +32,7 @@ WRITE_FEATURES = False
 feature_learners = {
     #"traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
-    "SimCLR + CNN" : SimCLR_C,
+    #"SimCLR + CNN" : SimCLR_C,
     "SimCLR + T" : SimCLR_T,
     #"NNCLR + CNN" : NNCLR_C,
     #"NNCLR + T" : NNCLR_T
