@@ -156,7 +156,12 @@ class SimCLR(nn.Module):
                 out_channels=EMBEDDING_WIDTH
             ))
         elif backbone == 'Transformer':
-            self.model = frameworks.SimCLR(backbone='Transformer')
+            self.model = frameworks.SimCLR(backbone=backbones.Transformer(
+                n_channels=X.shape[1],
+                len_sw=8,
+                n_classes=np.nanmax(y)+1,
+                dim=EMBEDDING_WIDTH
+            ))
 
         self.model = self.model.to(device)
         self.criterion =  nn.CrossEntropyLoss()
@@ -213,30 +218,38 @@ class SimCLR(nn.Module):
         self.model.load_state_dict(best_model)
         return
 
-
-    def get_features(self, X) -> np.ndarray:
-        pass
-
 class SimCLR_C(SimCLR):
     def __init__(self, X, y=None) -> None:
         super(SimCLR_C, self).__init__(X, y=y, backbone='CNN')
         
 
-    # def fit(self, X, y=None) -> None:
-    #     pass
-
-    # def get_features(self, X) -> np.ndarray:
-    #     pass
-
-class SimCLR_T(SimCLR):
-    def __init__(self, X) -> None:
-        super(SimCLR_C, self).__init__(X, 'Transformer')
-
-    def fit(self, X, y=None) -> None:
-        pass
 
     def get_features(self, X) -> np.ndarray:
-        pass
+        tensor_X = torch.Tensor(X)
+        tensor_X = tensor_X.to(device)
+        _, fet = self.model.encoder(tensor_X)
+        if device=='cpu':
+            fet = fet.detach.numpy()
+        else:
+            fet = fet.cpu().detach().numpy()
+
+        return np.nanmax(fet, axis=-1)
+        
+
+class SimCLR_T(SimCLR):
+    def __init__(self, X, y=None) -> None:
+        super(SimCLR_T, self).__init__(X, y=y, backbone='Transformer')
+
+    def get_features(self, X) -> np.ndarray:
+        tensor_X = torch.Tensor(X)
+        tensor_X = tensor_X.to(device)
+        _, fet = self.model.encoder(tensor_X)
+        if device=='cpu':
+            fet = fet.detach.numpy()
+        else:
+            fet = fet.cpu().detach().numpy()
+
+        return np.nanmax(fet, axis=-1)
 
 class NNCLR(nn.Module):
     def __init__(self, X, backbone='CNN') -> None:
