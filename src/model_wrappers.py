@@ -15,6 +15,8 @@ from utils.ts_feature_toolkit import get_features_for_set
 from torch.utils.data import DataLoader
 import multiprocessing
 from torchsummary import summary
+from CL_HAR.utils import logger
+import fitlog
 
 EMBEDDING_WIDTH = 64
 
@@ -52,7 +54,7 @@ class EarlyStopping():
 class Engineered_Features():
     def __init__(self, X) -> None:
         pass
-    def fit(self, X, y=None) -> None:
+    def fit(self, X_train, y_train=None, X_val=None, y_val=None) -> None:
         """
         Just here to be here
         """
@@ -83,22 +85,22 @@ class Conv_Autoencoder():
         summary(self.model, X.shape[1:])
 
 
-    def fit(self, X, y=None) -> None:
+    def fit(self, X_train, y_train=None, X_val=None, y_val=None) -> None:
         """
         Train cycle with early stopping
         """
-        torch_X = torch.Tensor(X)
-        torch_y = torch.Tensor(y)
-        dataset = torch.utils.data.TensorDataset(torch_X, torch_y)
-        dataloader = DataLoader(
-            dataset=dataset, batch_size = self.bath_size, shuffle=False, drop_last=True
+        train_torch_X = torch.Tensor(X_train)
+        train_torch_y = torch.Tensor(y_train)
+        train_dataset = torch.utils.data.TensorDataset(train_torch_X, train_torch_y)
+        train_dataloader = DataLoader(
+            dataset=train_dataset, batch_size = self.bath_size, shuffle=False, drop_last=True
         )
         early_stopping = EarlyStopping(tolerance=self.patience, min_delta=0.1)
         self.model.to(device)
         for epoch in range(self.max_epochs):
             print("Epoch: ", epoch, end='.')
             total_loss = 0
-            for x0, y0 in dataloader:
+            for x0, y0 in train_dataloader:
                 x0 = x0.to(device)
                 x_decoded, x_encoded = self.model(x0)
                 #x_decoded comes back channels last
@@ -111,19 +113,18 @@ class Conv_Autoencoder():
                 self.optimizer.step()
                 self.optimizer.zero_grad()
                 
-            avg_loss = total_loss.detach()/len(dataloader)
+            avg_loss = total_loss.detach()/len(train_dataloader)
             print('Train Loss: ', avg_loss.detach())
             early_stopping(avg_loss)
             if early_stopping.early_stop:
                 print("Stopping early")
-                
-
-
-
-             
+    
 
     def get_features(self, X) -> np.ndarray:
-        pass
+        if device == 'cuda':
+            return self.model(X).cpu().detach().numpy()
+        else:
+            return self.model(X).detach().numpy()
 
 
 class SimCLR(nn.Module):
@@ -142,11 +143,37 @@ class SimCLR(nn.Module):
         self.bath_size = 32
         summary(self.model, X.shape[1:])
 
-    def fit(self, X, y=None) -> None:
+    def fit(self, X_train, y_train, X_val, y_val) -> None:
         """
         Train cycle with early stopping
         """
-        pass
+        train_torch_X = torch.Tensor(X_train)
+        train_torch_y = torch.Tensor(y_train)
+        val_torch_X = torch.Tensor(X_val)
+        val_torch_y = torch.Tensor(y_val)
+
+        train_dataset = torch.utils.data.TensorDataset(train_torch_X, train_torch_y)
+        train_dataloader = DataLoader(
+            dataset=train_dataset, batch_size = self.bath_size, shuffle=False, drop_last=True
+        )
+
+        val_dataset = torch.utils.data.TensorDataset(val_torch_X, val_torch_y)
+        val_dataloader = DataLoader(
+            dataset=val_dataset, batch_size = self.bath_size, shuffle=False, drop_last=True
+        )
+
+        self.model = trainer.train(
+            train_loaders=[train_dataloader],
+            val_loader=[val_dataloader],
+            model=self.model,
+            logger=logger('temp/simCLR_train_log.txt'),
+            fitlog=fitlog,
+            DEVICE=device,
+            optimizers=self.optimizer,
+            schedulers=None,
+            criterion=self.criterion
+        )
+
 
     def get_features(self, X) -> np.ndarray:
         pass
