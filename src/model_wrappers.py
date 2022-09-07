@@ -4,6 +4,7 @@
 #
 #Make some nice models with a common interface
 
+from operator import mod
 import os
 from CL_HAR.models import backbones, frameworks, attention
 from CL_HAR import trainer
@@ -173,60 +174,58 @@ class Conv_Autoencoder():
 class SimCLR(nn.Module):
     def __init__(self, X, y=None, backbone='CNN') -> None:
         super(SimCLR, self).__init__()
-        if backbone=='CNN':
-            self.model = frameworks.SimCLR(backbone=backbones.FCN(
-                n_channels=X.shape[1],
-                n_classes=np.nanmax(y)+1,
-                out_channels=EMBEDDING_WIDTH
-            ))
-        elif backbone == 'Transformer':
-            #len_sw = sw
-            self.model = frameworks.SimCLR(backbone=backbones.Transformer(
-                n_channels=X.shape[2],
-                len_sw=16,
-                n_classes=np.nanmax(y)+1,
-                dim=EMBEDDING_WIDTH
-            ))
+        assert backbone in ['CNN', 'Transformer'], 'Backbone type not supported now'
+        # if backbone=='CNN':
+        #     self.model = frameworks.SimCLR(backbone=backbones.FCN(
+        #         n_channels=X.shape[1],
+        #         n_classes=np.nanmax(y)+1,
+        #         out_channels=EMBEDDING_WIDTH
+        #     ))
+        # elif backbone == 'Transformer':
+        #     #len_sw = sw
+        #     self.model = frameworks.SimCLR(backbone=backbones.Transformer(
+        #         n_channels=X.shape[2],
+        #         len_sw=16,
+        #         n_classes=np.nanmax(y)+1,
+        #         dim=EMBEDDING_WIDTH
+        #     ))
 
-        self.model = self.model.to(device)
-        self.criterion =  nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
-        self.patience = 7
-        self.max_epochs = 5
-        self.bath_size = 32
-        self.backbone = backbone
+        # self.model = self.model.to(device)
+        # self.criterion =  nn.CrossEntropyLoss()
+        # self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
+        # self.patience = 7
+        # self.max_epochs = 5
+        # self.bath_size = 32
+        # self.backbone = backbone
         #summary(self.model, X.shape[1:], X.shape[1:])
+        self.args = ArgHolder(
+            n_epoch=5,
+            batch_size=32,
+            framework="simclr",
+            model_name='FCN' if backbone=='CNN' else 'Transformer',
+            criterion="NTXent",
+            n_classes = np.nanmax(y)+1,
+        )
+        model, optimizers, schedulers, criterion, logger, fitlog, classifier, criterion_cls, optimizer_cls = trainer.setup(self.args, device)
+        self.model = model
+        self.optimizers = optimizers
+        self.schedulers = schedulers
+        self.criterion = criterion
+        self.logger = logger
+        self.fitlog = fitlog
+        self.classifier = classifier
+        self.criterion_cls = criterion_cls
+        self.optimizer_cls = optimizer_cls
 
     def fit(self, X_train, y_train, X_val, y_val) -> None:
         """
         Train cycle with early stopping
         """
-        train_torch_X = torch.Tensor(X_train)
-        train_torch_y = torch.Tensor(y_train)
-        train_torch_d = torch.zeros(train_torch_y.shape)
+        
+        train_dataloader = setup_dataloader(X_train, y_train)
 
-        val_torch_X = torch.Tensor(X_val)
-        val_torch_y = torch.Tensor(y_val)
-        val_torch_d = torch.zeros(val_torch_y.shape)
-
-        train_dataset = torch.utils.data.TensorDataset(train_torch_X, train_torch_y, train_torch_d)
-        train_dataloader = DataLoader(
-            dataset=train_dataset, batch_size = self.bath_size, shuffle=False, drop_last=True
-        )
-
-        val_dataset = torch.utils.data.TensorDataset(val_torch_X, val_torch_y, val_torch_d)
-        val_dataloader = DataLoader(
-            dataset=val_dataset, batch_size = self.bath_size, shuffle=False, drop_last=True
-        )
-
-        args = ArgHolder(
-            n_epoch=self.max_epochs,
-            batch_size=self.bath_size,
-            framework="simclr",
-            criterion='NTXent',
-            model_name=self.backbone
-        )
-        fitlog.set_log_dir('temp')
+        
+        val_dataloader = setup_dataloader(X_val, y_val)
 
         best_model = trainer.train(
             train_loaders=[train_dataloader],
