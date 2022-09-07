@@ -1,0 +1,6 @@
+data/
+.ipynb_checkpoints/
+.idea/*
+.DS_Store
+check.sh
+
