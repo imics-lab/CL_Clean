@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 import torch
 import pickle5 as cp
 from torch.utils.data import Dataset, DataLoader
-from data_preprocess.data_preprocess_utils import get_sample_weights, opp_sliding_window, normalize, train_test_val_split
+from CL_HAR.data_preprocess.data_preprocess_utils import get_sample_weights, opp_sliding_window, normalize, train_test_val_split
 
 NUM_FEATURES = 6
 

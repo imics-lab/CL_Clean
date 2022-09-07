@@ -3,20 +3,23 @@ import torch.nn as nn
 import numpy as np
 import os
 import pickle as cp
-from augmentations import gen_aug
-from utils import tsne, mds, _logger
+from CL_HAR.augmentations import gen_aug
+from CL_HAR.utils import tsne, mds, _logger
 import time
-from models.frameworks import *
-from models.backbones import *
-from models.loss import *
-from data_preprocess import data_preprocess_ucihar
-from data_preprocess import data_preprocess_shar
-from data_preprocess import data_preprocess_hhar
+from CL_HAR.models.frameworks import *
+from CL_HAR.models.backbones import *
+from CL_HAR.models.loss import *
+from CL_HAR.data_preprocess import data_preprocess_ucihar
+from CL_HAR.data_preprocess import data_preprocess_shar
+from CL_HAR.data_preprocess import data_preprocess_hhar
 
 from sklearn.metrics import f1_score
 import seaborn as sns
 import fitlog
 from copy import deepcopy
+
+recon = None
+nn_replacer = None
 
 # create directory for saving models and plots
 global model_dir_name
@@ -245,6 +248,16 @@ def calculate_model_loss(args, sample, target, model, criterion, DEVICE, recon=N
 def train(train_loaders, val_loader, model, logger, fitlog, DEVICE, optimizers, schedulers, criterion, args):
     best_model = None
     min_val_loss = 1e8
+
+    global nn_replacer
+    nn_replacer = None
+    if args.framework == 'nnclr':
+        nn_replacer = NNMemoryBankModule(size=args.mmb_size)
+
+    global recon
+    recon = None
+    if args.backbone in ['AE', 'CNN_AE']:
+        recon = nn.MSELoss()
 
     for epoch in range(args.n_epoch):
         logger.debug(f'\nEpoch : {epoch}')

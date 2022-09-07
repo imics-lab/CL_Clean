@@ -9,8 +9,8 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import torch
 import pickle as cp
-from data_preprocess.data_preprocess_utils import get_sample_weights, train_test_val_split
-from data_preprocess.base_loader import base_loader
+from CL_HAR.data_preprocess.data_preprocess_utils import get_sample_weights, train_test_val_split
+from CL_HAR.data_preprocess.base_loader import base_loader
 
 def format_data_x(datafile):
     x_data = None

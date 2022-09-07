@@ -8,9 +8,9 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torch
 import pickle as cp
-from data_preprocess.data_preprocess_utils import get_sample_weights, train_test_val_split
+from CL_HAR.data_preprocess.data_preprocess_utils import get_sample_weights, train_test_val_split
 import scipy.io
-from data_preprocess.base_loader import base_loader
+from CL_HAR.data_preprocess.base_loader import base_loader
 
 def load_domain_data(domain_idx):
     """ to load all the data from the specific domain with index domain_idx
