@@ -101,13 +101,13 @@ def setup_dataloader(X : np.ndarray, y : np.ndarray, args : ArgHolder):
 
     dataset = torch.utils.data.TensorDataset(torch_X, torch_y, torch_d)
     dataloader = DataLoader(
-        dataset=dataset, batch_size = args.batch_size, shuffle=False, drop_last=True
+        dataset=dataset, batch_size = args.batch_size, shuffle=False, drop_last=False
     )
     return dataloader
 
 
 class Engineered_Features():
-    def __init__(self, X) -> None:
+    def __init__(self, X, y=None) -> None:
         pass
     def fit(self, X_train, y_train=None, X_val=None, y_val=None) -> None:
         """
@@ -186,29 +186,7 @@ class SimCLR(nn.Module):
     def __init__(self, X, y=None, backbone='CNN') -> None:
         super(SimCLR, self).__init__()
         assert backbone in ['CNN', 'Transformer'], 'Backbone type not supported now'
-        # if backbone=='CNN':
-        #     self.model = frameworks.SimCLR(backbone=backbones.FCN(
-        #         n_channels=X.shape[1],
-        #         n_classes=np.nanmax(y)+1,
-        #         out_channels=EMBEDDING_WIDTH
-        #     ))
-        # elif backbone == 'Transformer':
-        #     #len_sw = sw
-        #     self.model = frameworks.SimCLR(backbone=backbones.Transformer(
-        #         n_channels=X.shape[2],
-        #         len_sw=16,
-        #         n_classes=np.nanmax(y)+1,
-        #         dim=EMBEDDING_WIDTH
-        #     ))
 
-        # self.model = self.model.to(device)
-        # self.criterion =  nn.CrossEntropyLoss()
-        # self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
-        # self.patience = 7
-        # self.max_epochs = 5
-        # self.bath_size = 32
-        # self.backbone = backbone
-        #summary(self.model, X.shape[1:], X.shape[1:])
         self.args = ArgHolder(
             n_epoch=5,
             batch_size=32,

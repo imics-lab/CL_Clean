@@ -26,14 +26,14 @@ from utils.add_nar import add_nar_from_array
 from model_wrappers import Engineered_Features, Conv_Autoencoder, SimCLR_C, SimCLR_T, NNCLR_C, NNCLR_T
 from sklearn.neighbors import KNeighborsClassifier
 
-K = 5
+K = 3
 WRITE_FEATURES = False
 
 feature_learners = {
     #"traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
-    #"SimCLR + CNN" : SimCLR_C,
-    #"SimCLR + T" : SimCLR_T,
+    "SimCLR + CNN" : SimCLR_C,
+    "SimCLR + T" : SimCLR_T,
     "NNCLR + CNN" : NNCLR_C,
     "NNCLR + T" : NNCLR_T
 }
@@ -84,17 +84,21 @@ def exp_1(
             f_learner = feature_learners[extractor](X_train, y=y_train_low)
             f_learner.fit(X_train, y_train_low, X_val, y_val_low)
             f_train = f_learner.get_features(X_train)
-            f = open(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', 'wb+')
-            if WRITE_FEATURES: np.save(f, f_train)
-            f.close()
+            
+            if WRITE_FEATURES:
+                f = open(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', 'wb+') 
+                np.save(f, f_train)
+                f.close()
 
         if os.path.exists(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy'):
             f_test = np.load(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', allow_pickle=True)
         else:
             f_test = f_learner.get_features(X_test)
-            f = open(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', 'wb+')
-            if WRITE_FEATURES: np.save(f, f_test)
-            f.close()
+            
+            if WRITE_FEATURES:
+                f = open(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', 'wb+') 
+                np.save(f, f_test)
+                f.close()
 
         #generate a fresh KNN classifier and fit it to the feature set
         model = KNeighborsClassifier(n_neighbors=K, metric='cosine')
