@@ -26,7 +26,7 @@ from utils.add_nar import add_nar_from_array
 from model_wrappers import Engineered_Features, Conv_Autoencoder, SimCLR_C, SimCLR_T, NNCLR_C, NNCLR_T
 from sklearn.neighbors import KNeighborsClassifier
 
-K = 3
+K = 5
 WRITE_FEATURES = False
 
 feature_learners = {
@@ -71,6 +71,21 @@ def exp_1(
     y_train_low, _, y_train_high, _ = add_nar_from_array(y_train, num_classes)
     y_val_low, _, y_val_high, _ = add_nar_from_array(y_val, num_classes)
     y_test_low, _, y_test_high, _ = add_nar_from_array(y_test, num_classes)
+
+    noise_dic = {
+        'low' : {
+            'percent' : 5,
+            'y_train' : y_train_low,
+            'y_val' : y_val_low,
+            'y_test' : y_test_low
+        },
+        'high' : {
+            'percent' : 10,
+            'y_train' : y_train_high,
+            'y_val' : y_val_high,
+            'y_test' : y_test_high
+        }
+    }
 
     #For each extractor apply the experiment with low noise labels
     for extractor in feature_learners.keys():
