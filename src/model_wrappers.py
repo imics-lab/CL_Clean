@@ -28,17 +28,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 #torch.backends.cudnn.enabled = False
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
-def setup_dataloader(X, y, args):
-    torch_X = torch.Tensor(X)
-    torch_y = torch.Tensor(y)
-    torch_d = torch.zeros(torch_y.shape)
 
-
-    dataset = torch.utils.data.TensorDataset(torch_X, torch_y, torch_d)
-    dataloader = DataLoader(
-        dataset=dataset, batch_size = args.batch_size, shuffle=False, drop_last=True
-    )
-    return dataloader
 
 
 #Shameless theft: https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
@@ -73,7 +63,7 @@ class ArgHolder():
         framework : str,
         model_name : str,
         criterion : str,
-        n_classes : int
+        n_class : int
     ):
         self.n_epoch = n_epoch
         self.batch_size  = batch_size
@@ -85,14 +75,33 @@ class ArgHolder():
         self.weight_decay = 1e-5
         self.aug1 = "t_flip"
         self.aug2 = "noise"
-        self.n_features = EMBEDDING_WIDTH
-        self.n_classes = n_classes
+        self.n_feature = EMBEDDING_WIDTH
+        self.n_class = n_class
         self.len_sw = SLIDING_WINDIW
         self.lr=LR
         self.p = EMBEDDING_WIDTH
         self.phid = EMBEDDING_WIDTH
         self.weight_decay = WEIGHT_DECAY
+        self.dataset = ""
+        self.EMA = 0.996
+        self.lambda1 = 1.0
+        self.lambda2 = 1.0
+        self.temp_unit = "gru"
+        self.logdir = 'temp/'
+        self.lr_cls = LR
+        self.embedding_width = EMBEDDING_WIDTH
 
+def setup_dataloader(X : np.ndarray, y : np.ndarray, args : ArgHolder):
+    torch_X = torch.Tensor(X)
+    torch_y = torch.Tensor(y)
+    torch_d = torch.zeros(torch_y.shape)
+
+
+    dataset = torch.utils.data.TensorDataset(torch_X, torch_y, torch_d)
+    dataloader = DataLoader(
+        dataset=dataset, batch_size = args.batch_size, shuffle=False, drop_last=True
+    )
+    return dataloader
 
 
 class Engineered_Features():
@@ -204,8 +213,12 @@ class SimCLR(nn.Module):
             framework="simclr",
             model_name='FCN' if backbone=='CNN' else 'Transformer',
             criterion="NTXent",
-            n_classes = np.nanmax(y)+1,
+            n_class = np.nanmax(y)+1,
         )
+        #Data is channels first
+        self.args.len_sw = X.shape[2]
+        self.args.n_feature = X.shape[1]
+
         model, optimizers, schedulers, criterion, logger, fitlog, classifier, criterion_cls, optimizer_cls = trainer.setup(self.args, device)
         self.model = model
         self.optimizers = optimizers
@@ -216,31 +229,35 @@ class SimCLR(nn.Module):
         self.classifier = classifier
         self.criterion_cls = criterion_cls
         self.optimizer_cls = optimizer_cls
+        
 
     def fit(self, X_train, y_train, X_val, y_val) -> None:
         """
         Train cycle with early stopping
         """
         
-        train_dataloader = setup_dataloader(X_train, y_train)
+        train_dataloader = setup_dataloader(X_train, y_train, self.args)
 
         
-        val_dataloader = setup_dataloader(X_val, y_val)
+        val_dataloader = setup_dataloader(X_val, y_val, self.args)
 
         best_model = trainer.train(
             train_loaders=[train_dataloader],
             val_loader=val_dataloader,
             model=self.model,
             logger=_logger('temp/simCLR_train_log.txt'),
-            fitlog=fitlog,
+            fitlog=self.fitlog,
             DEVICE=device,
-            optimizers=[self.optimizer],
-            schedulers=[],
+            optimizers=self.optimizers,
+            schedulers=self.schedulers,
             criterion=self.criterion,
-            args=args
+            args=self.args
         )
         self.model.load_state_dict(best_model)
         return
+
+    def __del__(self):
+        trainer.delete_files(self.args)
 
 class SimCLR_C(SimCLR):
     def __init__(self, X, y=None) -> None:
@@ -251,13 +268,13 @@ class SimCLR_C(SimCLR):
     def get_features(self, X) -> np.ndarray:
         tensor_X = torch.Tensor(X)
         tensor_X = tensor_X.to(device)
-        _, fet = self.model(tensor_X)
+        _, fet = self.model.encoder(tensor_X)
         if device=='cpu':
             fet = fet.detach.numpy()
         else:
             fet = fet.cpu().detach().numpy()
 
-        #return np.nanmax(fet, axis=-1)
+        return np.nanmax(fet, axis=-1)
         return fet
         
 

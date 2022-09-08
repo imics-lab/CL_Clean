@@ -23,6 +23,7 @@ class FCN(nn.Module):
                                          nn.ReLU(),
                                          nn.MaxPool1d(kernel_size=2, stride=2, padding=1))
 
+        self.out_len = 21
         if n_channels == 9: # ucihar
             self.out_len = 18
         elif n_channels == 3: # shar

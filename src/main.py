@@ -83,6 +83,7 @@ if __name__ == '__main__':
         print(f'Shape of test X: {X_test.shape}')
 
         ### Channels first and flatten labels
+        ### Update: CL HAR prefers channels last
         X_train = channel_swap(X_train)
         X_test = channel_swap(X_test)
         X_val = channel_swap(X_val)

@@ -76,7 +76,7 @@ def setup_linclf(args, DEVICE, bb_dim):
 def setup_model_optm(args, DEVICE, classifier=True):
     # set up backbone network
     if args.backbone == 'FCN':
-        backbone = FCN(n_channels=args.n_feature, n_classes=args.n_class, backbone=True)
+        backbone = FCN(n_channels=args.n_feature, n_classes=args.n_class, backbone=True, out_channels=args.embedding_width)
     elif args.backbone == 'DCL':
         backbone = DeepConvLSTM(n_channels=args.n_feature, n_classes=args.n_class, conv_kernels=64, kernel_size=5, LSTM_units=128, backbone=True)
     elif args.backbone == 'LSTM':
@@ -180,7 +180,10 @@ def setup(args, DEVICE):
 
     # fitlog
     fitlog.set_log_dir(args.logdir)
-    fitlog.add_hyper(args)
+
+    ### I'm taking this out and might put it back later- GA   
+    #fitlog.add_hyper(args)
+
     fitlog.add_hyper_in_file(__file__)
 
     criterion_cls = nn.CrossEntropyLoss()
