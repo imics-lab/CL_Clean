@@ -266,16 +266,20 @@ class SimCLR_C(SimCLR):
 
 
     def get_features(self, X) -> np.ndarray:
-        tensor_X = torch.Tensor(X)
-        tensor_X = tensor_X.to(device)
-        _, fet = self.model.encoder(tensor_X)
-        if device=='cpu':
-            fet = fet.detach.numpy()
+        dataloader = setup_dataloader(X, np.zeros(X.shape[0]), self.args)
+        fet = None
+        with torch.no_grad():
+            for x, y, d in dataloader:
+                x = x.to(device).float()
+                _, f = self.model.encoder(x)
+                if fet is None:
+                    fet = f
+                else:
+                    fet = torch.cat(fet, f)
+        if device == 'cuda':
+            return np.nanmax(fet.detach().cpu().numpy())
         else:
-            fet = fet.cpu().detach().numpy()
-
-        return np.nanmax(fet, axis=-1)
-        return fet
+            return np.nanmax(fet.detach().numpy())
         
 
 class SimCLR_T(SimCLR):
