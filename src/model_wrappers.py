@@ -275,11 +275,11 @@ class SimCLR_C(SimCLR):
                 if fet is None:
                     fet = f
                 else:
-                    fet = torch.cat(fet, f)
+                    fet = torch.cat((fet, f))
         if device == 'cuda':
-            return np.nanmax(fet.detach().cpu().numpy())
+            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
         else:
-            return np.nanmax(fet.detach().numpy())
+            return np.nanmax(fet.detach().numpy(), axis=2)
         
 
 class SimCLR_T(SimCLR):
@@ -287,15 +287,20 @@ class SimCLR_T(SimCLR):
         super(SimCLR_T, self).__init__(X, y=y, backbone='Transformer')
 
     def get_features(self, X) -> np.ndarray:
-        tensor_X = torch.Tensor(X)
-        tensor_X = tensor_X.to(device)
-        _, fet = self.model.encoder(tensor_X)
-        if device=='cpu':
-            fet = fet.detach.numpy()
+        dataloader = setup_dataloader(X, np.zeros(X.shape[0]), self.args)
+        fet = None
+        with torch.no_grad():
+            for x, y, d in dataloader:
+                x = x.to(device).float()
+                _, f = self.model.encoder(x)
+                if fet is None:
+                    fet = f
+                else:
+                    fet = torch.cat(fet, f)
+        if device == 'cuda':
+            return np.nanmax(fet.detach().cpu().numpy())
         else:
-            fet = fet.cpu().detach().numpy()
-
-        return fet
+            return np.nanmax(fet.detach().numpy())
 
 class NNCLR(nn.Module):
     def __init__(self, X, backbone='CNN') -> None:
