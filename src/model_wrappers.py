@@ -333,8 +333,11 @@ class NNCLR(nn.Module):
             args=self.args
         )
         self.model.load_state_dict(best_model)
+        self.model = trainer.lock_backbone(self.model, self.args)
         return
 
+    def __del__(self):
+        trainer.delete_files(self.args)
     
 
 class NNCLR_C(NNCLR):
@@ -347,7 +350,7 @@ class NNCLR_C(NNCLR):
         with torch.no_grad():
             for x, y, d in dataloader:
                 x = x.to(device).float()
-                _, f = self.model.encoder(x)
+                _, f = self.model(x)
                 if fet is None:
                     fet = f
                 else:
@@ -367,7 +370,7 @@ class NNCLR_T(NNCLR):
         with torch.no_grad():
             for x, y, d in dataloader:
                 x = x.to(device).float()
-                _, f = self.model.encoder(x)
+                _, f = self.model(x)
                 if fet is None:
                     fet = f
                 else:
