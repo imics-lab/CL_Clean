@@ -197,7 +197,7 @@ class SimCLR(nn.Module):
         )
         #Data is channels first
         self.args.len_sw = X.shape[2]
-        self.args.n_feature = X.shape[2]
+        self.args.n_feature = X.shape[1]
 
         model, optimizers, schedulers, criterion, logger, fitlog, classifier, criterion_cls, optimizer_cls = trainer.setup(self.args, device)
         self.model = model
@@ -359,7 +359,7 @@ class NNCLR_C(NNCLR):
 
 class NNCLR_T(NNCLR):
     def __init__(self, X, y=None) -> None:
-        super(NNCLR_T, self).__init__(X, 'Transformer')
+        super(NNCLR_T, self).__init__(X, y, 'Transformer')
 
     def get_features(self, X) -> np.ndarray:
         dataloader = setup_dataloader(X, np.zeros(X.shape[0]), self.args)

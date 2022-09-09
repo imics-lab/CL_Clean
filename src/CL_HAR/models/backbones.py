@@ -38,7 +38,7 @@ class FCN(nn.Module):
             self.logits = nn.Linear(self.out_len * out_channels, n_classes)
 
     def forward(self, x_in):
-        x_in = x_in.permute(0, 2, 1)
+        #x_in = x_in.permute(0, 2, 1)
         x = self.conv_block1(x_in)
         x = self.conv_block2(x)
         x = self.conv_block3(x)
