@@ -38,8 +38,6 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 
-
-
 #Shameless theft: https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
 class EarlyStopping():
     """
