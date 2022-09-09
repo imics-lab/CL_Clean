@@ -197,7 +197,7 @@ class SimCLR(nn.Module):
         )
         #Data is channels first
         self.args.len_sw = X.shape[2]
-        self.args.n_feature = X.shape[1]
+        self.args.n_feature = X.shape[2]
 
         model, optimizers, schedulers, criterion, logger, fitlog, classifier, criterion_cls, optimizer_cls = trainer.setup(self.args, device)
         self.model = model

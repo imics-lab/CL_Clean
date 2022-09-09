@@ -84,9 +84,9 @@ def setup_model_optm(args, DEVICE, classifier=True):
     elif args.backbone == 'AE':
         backbone = AE(n_channels=args.n_feature, len_sw=args.len_sw, n_classes=args.n_class, outdim=128, backbone=True)
     elif args.backbone == 'CNN_AE':
-        backbone = CNN_AE(n_channels=args.n_feature, n_classes=args.n_class, out_channels=128, backbone=True)
+        backbone = CNN_AE(n_channels=args.n_feature, n_classes=args.n_class, out_channels=args.embedding_width, backbone=True)
     elif args.backbone == 'Transformer':
-        backbone = Transformer(n_channels=args.n_feature, len_sw=args.len_sw, n_classes=args.n_class, dim=128, depth=4, heads=4, mlp_dim=64, dropout=0.1, backbone=True)
+        backbone = Transformer(n_channels=args.n_feature, len_sw=args.len_sw, n_classes=args.n_class, dim=args.embedding_width, depth=4, heads=4, mlp_dim=64, dropout=0.1, backbone=True)
     else:
         NotImplementedError
 
