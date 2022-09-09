@@ -4,6 +4,15 @@
 #
 #Make some nice models with a common interface
 
+#####################################################################
+#Supported Feature Learners:
+#  Engineered_Features -> Engineerd using signal processing
+#  SimCLR_C -> SimCLR w/ CNN encoder
+#  SimCLR_T -> SimCLR w/ Transformer encoder
+#  NNCLR_C  -> NNCLR w/ CNN encoder
+#  NNCLR_T  -> NNCLR w/ Transformer encoder
+#####################################################################
+
 from operator import mod
 import os
 from CL_HAR.models import backbones, frameworks, attention
@@ -18,6 +27,7 @@ from torchsummary import summary
 from CL_HAR.utils import _logger
 import fitlog
 
+
 EMBEDDING_WIDTH = 64
 SLIDING_WINDIW = 128
 LR = 0.001
@@ -25,8 +35,6 @@ WEIGHT_DECAY = 0
 NN_MEM = 1024
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-#work around for mapping error
-#torch.backends.cudnn.enabled = False
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 
