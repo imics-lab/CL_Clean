@@ -33,6 +33,7 @@ SLIDING_WINDIW = 128
 LR = 0.001
 WEIGHT_DECAY = 0
 NN_MEM = 1024
+CL_EPOCHS = 60
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
@@ -288,7 +289,7 @@ class SimCLR_T(SimCLR):
         if device == 'cuda':
             return fet.detach().cpu().numpy()
         else:
-            return np.nanmax(fet.detach().numpy(), axis=2)
+            return fet.detach().numpy()
 
 class NNCLR(nn.Module):
     def __init__(self, X, y=None, backbone='CNN') -> None:
@@ -383,7 +384,7 @@ class NNCLR_T(NNCLR):
                 else:
                     fet = torch.cat((fet, f))
         if device == 'cuda':
-            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
+            return fet.detach().cpu().numpy()
         else:
-            return np.nanmax(fet.detach().numpy(), axis=2)
+            return fet.detach().numpy()
 
