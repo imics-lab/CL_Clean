@@ -245,6 +245,8 @@ class Transformer(nn.Module):
             self.classifier = nn.Linear(dim, n_classes)
 
     def forward(self, x):
+        ### Experimenting with a little permute
+        x = x.permute(0, 2, 1)
         x = self.transformer(x)
         if self.backbone:
             return None, x

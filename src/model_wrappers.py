@@ -241,6 +241,7 @@ class SimCLR(nn.Module):
             args=self.args
         )
         self.model.load_state_dict(best_model)
+        self.model = trainer.lock_backbone(self.model, self.args)
         return
 
     def __del__(self):
@@ -258,7 +259,7 @@ class SimCLR_C(SimCLR):
         with torch.no_grad():
             for x, y, d in dataloader:
                 x = x.to(device).float()
-                _, f = self.model.encoder(x)
+                _, f = self.model(x)
                 if fet is None:
                     fet = f
                 else:
@@ -279,13 +280,13 @@ class SimCLR_T(SimCLR):
         with torch.no_grad():
             for x, y, d in dataloader:
                 x = x.to(device).float()
-                _, f = self.model.encoder(x)
+                _, f = self.model(x)
                 if fet is None:
                     fet = f
                 else:
                     fet = torch.cat((fet, f))
         if device == 'cuda':
-            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
+            return fet.detach().cpu().numpy()
         else:
             return np.nanmax(fet.detach().numpy(), axis=2)
 
