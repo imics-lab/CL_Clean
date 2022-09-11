@@ -9,8 +9,10 @@
 #  Engineered_Features -> Engineerd using signal processing
 #  SimCLR_C -> SimCLR w/ CNN encoder
 #  SimCLR_T -> SimCLR w/ Transformer encoder
+#  SimCLR_R -> SimCLR w/ Convolutional LSTM encoder
 #  NNCLR_C  -> NNCLR w/ CNN encoder
 #  NNCLR_T  -> NNCLR w/ Transformer encoder
+#  NNCLR_R  -> NNCLR w/ Covolutional LSTM encoder
 #####################################################################
 
 from operator import mod
@@ -431,4 +433,37 @@ class NNCLR_R(NNCLR):
             return np.nanmax(fet.detach().cpu().numpy(), axis=2)
         else:
             return np.nanmax(fet.detach().numpy(), axis=2)
+
+class Supervised_Convolutional(nn.Module):
+    def __init__(self, X, y=None) -> None:
+        self.encoder = nn.Sequential(nn.Conv1d(X.shape[2], 32, kernel_size=8, stride=1, bias=False, padding=4),
+                                        nn.BatchNorm1d(32),
+                                        nn.ReLU(),
+                                        nn.MaxPool1d(kernel_size=2, stride=2, padding=1),
+                                        nn.Dropout(0.35),
+                                        nn.Conv1d(32, 64, kernel_size=8, stride=1, bias=False, padding=4),
+                                        nn.BatchNorm1d(64),
+                                        nn.ReLU(),
+                                        nn.MaxPool1d(kernel_size=2, stride=2, padding=1),
+                                        nn.Conv1d(64, EMBEDDING_WIDTH, kernel_size=8, stride=1, bias=False, padding=4),
+                                        nn.BatchNorm1d(EMBEDDING_WIDTH),
+                                        nn.ReLU(),
+                                        nn.MaxPool1d(kernel_size=2, stride=2, padding=1),
+                                        nn.AdaptiveAvgPool1d(EMBEDDING_WIDTH))
+        
+        self.n_classes = np.nanmax(y) + 1
+        self.classifier_block = nn.Linear(EMBEDDING_WIDTH, self.n_classes)
+
+        self.model = nn.Sequential(self.encoder, self.classifier_block)
+
+        self.criterion = nn.CrossEntropyLoss()
+        self.optimizer = torch.optim.Adam(self.model.parameters())
+
+        self.model = self.model.to(device)
+
+    def fit(self, X_train, y_train, X_val, y_val) -> None:
+        pass
+
+    def get_features(self, X) -> np.ndarray:
+        pass
 
