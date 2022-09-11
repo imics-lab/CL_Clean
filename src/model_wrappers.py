@@ -33,7 +33,9 @@ SLIDING_WINDIW = 128
 LR = 0.001
 WEIGHT_DECAY = 0
 NN_MEM = 1024
-CL_EPOCHS = 60
+CL_EPOCHS = 80
+
+LOG = _logger('temp/train_log.txt')
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
@@ -195,7 +197,7 @@ class SimCLR(nn.Module):
         assert backbone in ['CNN', 'Transformer'], 'Backbone type not supported now'
 
         self.args = ArgHolder(
-            n_epoch=5,
+            n_epoch=CL_EPOCHS,
             batch_size=32,
             framework="simclr",
             model_name='FCN' if backbone=='CNN' else 'Transformer',
@@ -233,7 +235,7 @@ class SimCLR(nn.Module):
             train_loaders=[train_dataloader],
             val_loader=val_dataloader,
             model=self.model,
-            logger=_logger('temp/simCLR_train_log.txt'),
+            logger=LOG,
             fitlog=self.fitlog,
             DEVICE=device,
             optimizers=self.optimizers,
@@ -291,13 +293,35 @@ class SimCLR_T(SimCLR):
         else:
             return fet.detach().numpy()
 
+class SimCLR_R(SimCLR):
+    def __init__(self, X, y=None) -> None:
+        super(SimCLR_R, self).__init__(X, y=y, backbone='DeepConvLSTM')
+        
+
+
+    def get_features(self, X) -> np.ndarray:
+        dataloader = setup_dataloader(X, np.zeros(X.shape[0]), self.args)
+        fet = None
+        with torch.no_grad():
+            for x, y, d in dataloader:
+                x = x.to(device).float()
+                _, f = self.model(x)
+                if fet is None:
+                    fet = f
+                else:
+                    fet = torch.cat((fet, f))
+        if device == 'cuda':
+            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
+        else:
+            return np.nanmax(fet.detach().numpy(), axis=2)
+
 class NNCLR(nn.Module):
     def __init__(self, X, y=None, backbone='CNN') -> None:
         super(NNCLR, self).__init__()
         assert backbone in ['CNN', 'Transformer'], 'Backbone type not supported now'
 
         self.args = ArgHolder(
-            n_epoch=5,
+            n_epoch=CL_EPOCHS,
             batch_size=32,
             framework="nnclr",
             model_name='FCN' if backbone=='CNN' else 'Transformer',
@@ -332,7 +356,7 @@ class NNCLR(nn.Module):
             train_loaders=[train_dataloader],
             val_loader=val_dataloader,
             model=self.model,
-            logger=_logger('temp/simCLR_train_log.txt'),
+            logger=LOG,
             fitlog=self.fitlog,
             DEVICE=device,
             optimizers=self.optimizers,
@@ -387,4 +411,24 @@ class NNCLR_T(NNCLR):
             return fet.detach().cpu().numpy()
         else:
             return fet.detach().numpy()
+
+class NNCLR_R(NNCLR):
+    def __init__(self, X, y=None) -> None:
+        super(NNCLR_R, self).__init__(X, y, 'CNN')
+
+    def get_features(self, X) -> np.ndarray:
+        dataloader = setup_dataloader(X, np.zeros(X.shape[0]), self.args)
+        fet = None
+        with torch.no_grad():
+            for x, y, d in dataloader:
+                x = x.to(device).float()
+                _, f = self.model(x)
+                if fet is None:
+                    fet = f
+                else:
+                    fet = torch.cat((fet, f))
+        if device == 'cuda':
+            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
+        else:
+            return np.nanmax(fet.detach().numpy(), axis=2)
 

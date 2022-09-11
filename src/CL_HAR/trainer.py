@@ -78,7 +78,7 @@ def setup_model_optm(args, DEVICE, classifier=True):
     if args.backbone == 'FCN':
         backbone = FCN(n_channels=args.n_feature, n_classes=args.n_class, backbone=True, out_channels=args.embedding_width)
     elif args.backbone == 'DCL':
-        backbone = DeepConvLSTM(n_channels=args.n_feature, n_classes=args.n_class, conv_kernels=64, kernel_size=5, LSTM_units=128, backbone=True)
+        backbone = DeepConvLSTM(n_channels=args.n_feature, n_classes=args.n_class, conv_kernels=64, kernel_size=5, LSTM_units=args.embedding_width, backbone=True)
     elif args.backbone == 'LSTM':
         backbone = LSTM(n_channels=args.n_feature, n_classes=args.n_class, LSTM_units=128, backbone=True)
     elif args.backbone == 'AE':

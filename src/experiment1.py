@@ -26,7 +26,7 @@ from utils.add_nar import add_nar_from_array
 from model_wrappers import Engineered_Features, Conv_Autoencoder, SimCLR_C, SimCLR_T, NNCLR_C, NNCLR_T
 from sklearn.neighbors import KNeighborsClassifier
 
-K = 5
+K = 7
 WRITE_FEATURES = False
 
 feature_learners = {
