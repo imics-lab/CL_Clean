@@ -196,16 +196,18 @@ class Conv_Autoencoder():
 class SimCLR(nn.Module):
     def __init__(self, X, y=None, backbone='CNN') -> None:
         super(SimCLR, self).__init__()
-        assert backbone in ['CNN', 'Transformer'], 'Backbone type not supported now'
+        assert backbone in ['CNN', 'Transformer', 'DeepConvLSTM'], 'Backbone type not supported now'
 
         self.args = ArgHolder(
             n_epoch=CL_EPOCHS,
             batch_size=32,
             framework="simclr",
-            model_name='FCN' if backbone=='CNN' else 'Transformer',
+            model_name='FCN' if backbone=='CNN' else backbone,
             criterion="NTXent",
             n_class = np.nanmax(y)+1,
         )
+        if self.args.backbone == "DeepConvLSTM" : self.args.backbone = 'DCL'
+
         #Data is channels first
         self.args.len_sw = X.shape[2]
         self.args.n_feature = X.shape[1]
@@ -313,23 +315,24 @@ class SimCLR_R(SimCLR):
                 else:
                     fet = torch.cat((fet, f))
         if device == 'cuda':
-            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
+            return fet.detach().cpu().numpy()
         else:
             return np.nanmax(fet.detach().numpy(), axis=2)
 
 class NNCLR(nn.Module):
     def __init__(self, X, y=None, backbone='CNN') -> None:
         super(NNCLR, self).__init__()
-        assert backbone in ['CNN', 'Transformer'], 'Backbone type not supported now'
+        assert backbone in ['CNN', 'Transformer', 'DeepConvLSTM'], 'Backbone type not supported now'
 
         self.args = ArgHolder(
             n_epoch=CL_EPOCHS,
             batch_size=32,
             framework="nnclr",
-            model_name='FCN' if backbone=='CNN' else 'Transformer',
+            model_name='FCN' if backbone=='CNN' else backbone,
             criterion="NTXent",
             n_class = np.nanmax(y)+1,
         )
+        if self.args.model_name == "DeepConvLSTM" : self.args.model_name = 'DCL'
         #Data is channels first
         self.args.len_sw = X.shape[2]
         self.args.n_feature = X.shape[1]
@@ -430,9 +433,9 @@ class NNCLR_R(NNCLR):
                 else:
                     fet = torch.cat((fet, f))
         if device == 'cuda':
-            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
+            return np.nanmax(fet.detach().cpu().numpy())
         else:
-            return np.nanmax(fet.detach().numpy(), axis=2)
+            return np.nanmax(fet.detach().numpy())
 
 class Supervised_Convolutional(nn.Module):
     def __init__(self, X, y=None) -> None:

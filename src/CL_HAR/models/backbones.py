@@ -75,6 +75,7 @@ class DeepConvLSTM(nn.Module):
     def forward(self, x):
         self.lstm.flatten_parameters()
         x = x.unsqueeze(1)
+        x = x.permute(0, 1, 3, 2)
         x = self.activation(self.conv1(x))
         x = self.activation(self.conv2(x))
         x = self.activation(self.conv3(x))
