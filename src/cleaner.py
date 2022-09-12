@@ -34,7 +34,17 @@ def KNNLabel(
             fuzzy_y = np.concatenate((fuzzy_y, np.array([n_labels])), axis=0)
         else:
             fuzzy_y = np.array([n_labels])
-    return fuzzy_y 
+    return fuzzy_y
+
+def HOC(
+    rounds : int,
+    X : np.ndarray,
+    y : np.ndarray
+) -> np.ndarray:
+    T_bar = None
+    p_bar = None
+    for _ in range(rounds):
+        pass
 
 
 
