@@ -27,12 +27,12 @@ from model_wrappers import Engineered_Features, Conv_Autoencoder, SimCLR_C, SimC
 from model_wrappers import SimCLR_R, NNCLR_R
 from sklearn.neighbors import KNeighborsClassifier
 
-K = 7
+K = 5
 WRITE_FEATURES = False
 
 feature_learners = {
     "traditional" : Engineered_Features,
-    "CAE" : Conv_Autoencoder,
+    #"CAE" : Conv_Autoencoder,
     "SimCLR + CNN" : SimCLR_C,
     "SimCLR + T" : SimCLR_T,
     "SimCLR + LSTM" : SimCLR_R,
@@ -125,7 +125,7 @@ def exp_1(
                     f.close()
 
             #generate a fresh KNN classifier and fit it to the feature set
-            model = KNeighborsClassifier(n_neighbors=K, metric='cosine')
+            model = KNeighborsClassifier(n_neighbors=K, weights='distance', metric='cosine')
             model.fit(f_train, y_train_noisey)
 
             #predict a label for every instance
