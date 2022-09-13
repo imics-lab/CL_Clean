@@ -179,7 +179,7 @@ def uci_har_load_dataset(
         print('The validation group is generated using sklearn stratify on train')
         print('It is not subject independent - confirm accuracy with test set')
         x_train, x_validation, y_train, y_validation = train_test_split(x_train, y_train, test_size=0.25, random_state=42, stratify=y_train)
-        return x_train, y_train, x_validation, y_validation, x_test, y_test, info_dict
+        return x_train, y_train, x_validation, y_validation, x_test, y_test#, info_dict
     else:
         return x_train, y_train, x_test, y_test #, info_dict
 

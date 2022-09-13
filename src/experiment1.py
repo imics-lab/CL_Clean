@@ -31,13 +31,13 @@ K = 7
 WRITE_FEATURES = False
 
 feature_learners = {
-    #"traditional" : Engineered_Features,
-    #"CAE" : Conv_Autoencoder,
-    #"SimCLR + CNN" : SimCLR_C,
-    #"SimCLR + T" : SimCLR_T,
+    "traditional" : Engineered_Features,
+    "CAE" : Conv_Autoencoder,
+    "SimCLR + CNN" : SimCLR_C,
+    "SimCLR + T" : SimCLR_T,
     "SimCLR + LSTM" : SimCLR_R,
-    #"NNCLR + CNN" : NNCLR_C,
-    #"NNCLR + T" : NNCLR_T,
+    "NNCLR + CNN" : NNCLR_C,
+    "NNCLR + T" : NNCLR_T,
     "NNCLR + LSTM" : NNCLR_R
 }
 
@@ -92,79 +92,86 @@ def exp_1(
 
     #For each extractor apply the experiment with low noise labels
     for extractor in feature_learners.keys():
+        for noise_level in noise_dic.keys():
 
-        print(f"## Experiment 1: Low Noise + {extractor} with {set}")
-        print("Shape of X_train in experiment 1: ", X_train.shape)
-        
-        #check storage for features and generate if necesary
-        if os.path.exists(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy'):
-            f_train = np.load(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', allow_pickle=True)
-        else:
-            f_learner = feature_learners[extractor](X_train, y=y_train_low)
-            f_learner.fit(X_train, y_train_low, X_val, y_val_low)
-            f_train = f_learner.get_features(X_train)
+            y_train_noisey = noise_dic[noise_level]['y_train']
+            y_val_noisey = noise_dic[noise_level]['y_val']
+            y_test_noisey = noise_dic[noise_level]['y_test']
+
+            print(f"## Experiment 1: Low Noise + {extractor} with {set}")
+            print("Shape of X_train in experiment 1: ", X_train.shape)
             
-            if WRITE_FEATURES:
-                f = open(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', 'wb+') 
-                np.save(f, f_train)
-                f.close()
-
-        if os.path.exists(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy'):
-            f_test = np.load(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', allow_pickle=True)
-        else:
-            f_test = f_learner.get_features(X_test)
-            
-            if WRITE_FEATURES:
-                f = open(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', 'wb+') 
-                np.save(f, f_test)
-                f.close()
-
-        #generate a fresh KNN classifier and fit it to the feature set
-        model = KNeighborsClassifier(n_neighbors=K, metric='cosine')
-        model.fit(f_train, y_train_low)
-
-        #predict a label for every instance
-        y_pred = model.predict(f_test)
-
-        #flatten labels if they're one-hot
-        if y_pred.ndim > 1:
-            y_pred = np.argmax(y_pred, axis=-1)
-
-        #iterate over predicted labels, tabulate mispredictions
-        num_instances = X_test.shape[0]
-        count_mispredicted = 0
-        count_mispred_given_cor = 0
-        count_mispred_given_inc = 0
-        count_lab_equals_class = 0
-        count_cor = 0
-        count_inc = 0
-        
-        for i in range(len(y_pred)): 
-            #Mislabeled
-            if y_test_low[i] != y_test[i]:
-                count_inc += 1
-                if y_pred[i] != y_test_low[i]:
-                    count_mispredicted += 1
-                    count_mispred_given_inc += 1
-            #Correct Label
+            #check storage for features and generate if necesary
+            if os.path.exists(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy'):
+                f_train = np.load(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', allow_pickle=True)
             else:
-                count_cor += 1
-                if y_pred[i] != y_test_low[i]:
-                    count_mispredicted += 1
-                    count_mispred_given_cor += 1
-            
-            if y_pred[i] == y_test[i]:
-                count_lab_equals_class += 1
+                f_learner = feature_learners[extractor](X_train, y=y_train_noisey)
+                f_learner.fit(X_train, y_train_noisey, X_val, y_val_noisey)
+                f_train = f_learner.get_features(X_train)
+                
+                if WRITE_FEATURES:
+                    f = open(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', 'wb+') 
+                    np.save(f, f_train)
+                    f.close()
 
-        #add up the results in the results dictionary
-        results['set'].append(set)
-        results['features'].append(extractor)
-        results['noise percent'].append(5)
-        results['P(mispred)'].append(count_mispredicted / num_instances)
-        results['P(mispred|correct)'].append(count_mispred_given_cor / count_cor)
-        results['P(mispred|incorrect)'].append(count_mispred_given_inc / count_inc)
-        results['P(pred label = class)'].append(count_lab_equals_class/num_instances)
-        results['number mislabeled'].append(count_inc)
+            if os.path.exists(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy'):
+                f_test = np.load(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', allow_pickle=True)
+            else:
+                f_test = f_learner.get_features(X_test)
+                
+                if WRITE_FEATURES:
+                    f = open(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', 'wb+') 
+                    np.save(f, f_test)
+                    f.close()
+
+            #generate a fresh KNN classifier and fit it to the feature set
+            model = KNeighborsClassifier(n_neighbors=K, metric='cosine')
+            model.fit(f_train, y_train_noisey)
+
+            #predict a label for every instance
+            y_pred = model.predict(f_test)
+
+            #flatten labels if they're one-hot
+            if y_pred.ndim > 1:
+                y_pred = np.argmax(y_pred, axis=-1)
+
+            #iterate over predicted labels, tabulate mispredictions
+            num_instances = X_test.shape[0]
+            count_mispredicted = 0
+            count_mispred_given_cor = 0
+            count_mispred_given_inc = 0
+            count_lab_equals_class = 0
+            count_cor = 0
+            count_inc = 0
+            
+            for i in range(len(y_pred)): 
+                #Mislabeled
+                if y_test_noisey[i] != y_test[i]:
+                    count_inc += 1
+                    if y_pred[i] != y_test_noisey[i]:
+                        count_mispredicted += 1
+                        count_mispred_given_inc += 1
+                #Correct Label
+                else:
+                    count_cor += 1
+                    if y_pred[i] != y_test_noisey[i]:
+                        count_mispredicted += 1
+                        count_mispred_given_cor += 1
+                
+                if y_pred[i] == y_test[i]:
+                    count_lab_equals_class += 1
+
+            #add up the results in the results dictionary
+            results['set'].append(set)
+            results['features'].append(extractor)
+            results['noise percent'].append(noise_dic[noise_level]['percent'])
+            results['P(mispred)'].append(count_mispredicted / num_instances)
+            results['P(mispred|correct)'].append(count_mispred_given_cor / count_cor)
+            results['P(mispred|incorrect)'].append(count_mispred_given_inc / count_inc)
+            results['P(pred label = class)'].append(count_lab_equals_class/num_instances)
+            results['number mislabeled'].append(count_inc)
+        # End for noise level
+    #End for feature extractor
 
     return results
 
