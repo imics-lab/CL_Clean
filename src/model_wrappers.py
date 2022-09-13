@@ -35,7 +35,7 @@ SLIDING_WINDIW = 128
 LR = 0.001
 WEIGHT_DECAY = 0
 NN_MEM = 1024
-CL_EPOCHS = 80
+CL_EPOCHS = 5 #80
 
 LOG = _logger('temp/train_log.txt')
 
@@ -433,9 +433,9 @@ class NNCLR_R(NNCLR):
                 else:
                     fet = torch.cat((fet, f))
         if device == 'cuda':
-            return np.nanmax(fet.detach().cpu().numpy())
+            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
         else:
-            return np.nanmax(fet.detach().numpy())
+            return np.nanmax(fet.detach().numpy(), axis=2)
 
 class Supervised_Convolutional(nn.Module):
     def __init__(self, X, y=None) -> None:
