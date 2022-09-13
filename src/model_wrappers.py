@@ -35,7 +35,7 @@ SLIDING_WINDIW = 128
 LR = 0.001
 WEIGHT_DECAY = 0
 NN_MEM = 1024
-CL_EPOCHS = 5 #80
+CL_EPOCHS = 15 #80
 
 LOG = _logger('temp/train_log.txt')
 

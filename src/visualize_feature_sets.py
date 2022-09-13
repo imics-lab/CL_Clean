@@ -19,15 +19,26 @@ from sklearn.preprocessing import MinMaxScaler
 
 WRITE_FEATURES = False
 
+umap_neighbors = 15
+umap_dim = 3
+
+class None_Extractor():
+    def __init__(self,X, y): pass
+    def fit(self, X, y, Xv, yv): pass
+    def get_features(self, X): 
+        return np.reshape(X, (X.shape[0], X.shape[2]))
+
+
 feature_learners = {
-    "traditional" : Engineered_Features,
+    #"none" : None_Extractor,
+    #"traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
     "SimCLR + CNN" : SimCLR_C,
     "SimCLR + T" : SimCLR_T,
-    "SimCLR + LSTM" : SimCLR_R,
+    #"SimCLR + LSTM" : SimCLR_R,
     "NNCLR + CNN" : NNCLR_C,
     "NNCLR + T" : NNCLR_T,
-    "NNCLR + LSTM" : NNCLR_R
+    #"NNCLR + LSTM" : NNCLR_R
 }
 
 datasets = {
@@ -46,10 +57,13 @@ def channel_swap(X : np.ndarray) -> np.ndarray:
 
 if __name__ == '__main__':
 
-    for set in datasets.keys:
+    if not os.path.exists('imgs'):
+        os.mkdir('imgs')
+
+    for set in datasets.keys():
         ### Fetch Dataset ###
         X_train, y_train, X_val, y_val, X_test, y_test = datasets[set](
-            incl_xyz_accel=True, incl_rms_accel=False, incl_val_group=True
+            incl_xyz_accel=False, incl_rms_accel=True, incl_val_group=True
         )
 
         ### Channels first and flatten labels
@@ -74,11 +88,22 @@ if __name__ == '__main__':
             extractor.fit(X_train, y_train, X_val, y_val)
 
             features_1_train = extractor.get_features(X_train)
-            features_1_test = extractor.get_features(X_test)
+            #features_1_test = extractor.get_features(X_test)
 
-            reducer = umap.UMAP(n_neighbors=15, n_components=2)
+            reducer = umap.UMAP(n_neighbors=umap_neighbors, n_components=umap_dim)
             embedding = reducer.fit_transform(features_1_train)
+
             plt.figure()
+            if umap_dim==2:
+                plt.scatter(embedding[:,0], embedding[:,1], c=y_train)
+            else:
+                ax = plt.axes(projection ="3d")
+                ax.scatter(embedding[:,0], embedding[:,1], embedding[:,2], c=y_train)
+
+            plt.savefig(f'imgs/{set}_with_{extractor_name}.pdf')
+            del extractor
+            del reducer
+            del features_1_train
 
 
 
