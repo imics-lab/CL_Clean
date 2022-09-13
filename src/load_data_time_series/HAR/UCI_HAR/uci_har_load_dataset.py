@@ -151,12 +151,16 @@ def uci_har_load_dataset(
     gyro_train = np.dstack((body_gyro_x_train,body_gyro_y_train,body_gyro_z_train))
     acc_test = np.dstack((body_acc_x_test,body_acc_y_test,body_acc_z_test))
     gyro_test = np.dstack((body_gyro_x_test,body_gyro_y_test,body_gyro_z_test))
-    ttl_acc_train = np.sqrt((acc_train[:,:,0]**2) + (acc_train[:,:,1]**2) + (acc_train[:,:,2]**2))
-    ttl_acc_test = np.sqrt((acc_test[:,:,0]**2) + (acc_test[:,:,1]**2) + (acc_test[:,:,2]**2))
-    ttl_gyro_train = np.sqrt((gyro_train[:,:,0]**2) + (gyro_train[:,:,1]**2) + (gyro_train[:,:,2]**2))
-    ttl_gyro_test = np.sqrt((gyro_test[:,:,0]**2) + (gyro_test[:,:,1]**2) + (gyro_test[:,:,2]**2))
-    x_train = np.dstack((acc_train,ttl_acc_train,gyro_train,ttl_gyro_train))
-    x_test = np.dstack((acc_test,ttl_acc_test,gyro_test,ttl_gyro_test))
+    if incl_rms_accel:
+        ttl_acc_train = np.sqrt((acc_train[:,:,0]**2) + (acc_train[:,:,1]**2) + (acc_train[:,:,2]**2))
+        ttl_acc_test = np.sqrt((acc_test[:,:,0]**2) + (acc_test[:,:,1]**2) + (acc_test[:,:,2]**2))
+        ttl_gyro_train = np.sqrt((gyro_train[:,:,0]**2) + (gyro_train[:,:,1]**2) + (gyro_train[:,:,2]**2))
+        ttl_gyro_test = np.sqrt((gyro_test[:,:,0]**2) + (gyro_test[:,:,1]**2) + (gyro_test[:,:,2]**2))
+        x_train = np.dstack((acc_train,ttl_acc_train,gyro_train,ttl_gyro_train))
+        x_test = np.dstack((acc_test,ttl_acc_test,gyro_test,ttl_gyro_test))
+    else:
+        x_train = np.dstack((acc_train,gyro_train,))
+        x_test = np.dstack((acc_test,gyro_test,))
 
     #remove channels not needed - a bit brute force
     info_dict['channel_names'] = ['accel_x','accel_y','accel_z', 'accel_ttl',
