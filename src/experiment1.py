@@ -17,8 +17,7 @@
 #   Null: contrastive learning will be no more likely to identify the correct label of data than AE or traditional
 #   Alternative: labels predicted using CL will be more likely to match the true class
 
-from unittest import result
-import torch
+
 import os
 from torch import Tensor
 import numpy as np
@@ -26,6 +25,7 @@ from utils.add_nar import add_nar_from_array
 from model_wrappers import Engineered_Features, Conv_Autoencoder, SimCLR_C, SimCLR_T, NNCLR_C, NNCLR_T
 from model_wrappers import SimCLR_R, NNCLR_R
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
 
 K = 5
 WRITE_FEATURES = False
@@ -59,6 +59,7 @@ def exp_1(
         'set' : [],
         'features' : [],
         'noise percent' : [],
+        'accuracy' : [],
         'number mislabeled' : [],
         'P(mispred)' : [],
         'P(mispred|correct)' : [],
@@ -76,6 +77,12 @@ def exp_1(
     y_test_low, _, y_test_high, _ = add_nar_from_array(y_test, num_classes)
 
     noise_dic = {
+        'none' : {
+            'percent' : 0,
+            'y_train' : y_train,
+            'y_val' : y_val,
+            'y_test' : y_test
+        },
         'low' : {
             'percent' : 5,
             'y_train' : y_train_low,
@@ -98,7 +105,7 @@ def exp_1(
             y_val_noisey = noise_dic[noise_level]['y_val']
             y_test_noisey = noise_dic[noise_level]['y_test']
 
-            print(f"## Experiment 1: Low Noise + {extractor} with {set}")
+            print(f"## Experiment 1: {noise_level} Noise + {extractor} with {set}")
             print("Shape of X_train in experiment 1: ", X_train.shape)
             
             #check storage for features and generate if necesary
@@ -126,6 +133,7 @@ def exp_1(
 
             #generate a fresh KNN classifier and fit it to the feature set
             model = KNeighborsClassifier(n_neighbors=K, weights='distance', metric='cosine')
+            #model = SVC()
             model.fit(f_train, y_train_noisey)
 
             #predict a label for every instance
@@ -165,9 +173,10 @@ def exp_1(
             results['set'].append(set)
             results['features'].append(extractor)
             results['noise percent'].append(noise_dic[noise_level]['percent'])
+            results['accuracy'].append(accuracy_score(y_pred, y_test_noisey))
             results['P(mispred)'].append(count_mispredicted / num_instances)
             results['P(mispred|correct)'].append(count_mispred_given_cor / count_cor)
-            results['P(mispred|incorrect)'].append(count_mispred_given_inc / count_inc)
+            results['P(mispred|incorrect)'].append(count_mispred_given_inc / count_inc if count_inc != 0 else 0)
             results['P(pred label = class)'].append(count_lab_equals_class/num_instances)
             results['number mislabeled'].append(count_inc)
         # End for noise level

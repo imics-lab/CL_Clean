@@ -30,7 +30,7 @@ from CL_HAR.utils import _logger
 import fitlog
 
 
-EMBEDDING_WIDTH = 64
+EMBEDDING_WIDTH = 96
 SLIDING_WINDIW = 128
 LR = 0.001
 WEIGHT_DECAY = 0
@@ -169,10 +169,7 @@ class Conv_Autoencoder():
             for x0, y0 in train_dataloader:
                 x0 = x0.to(device)
                 x_decoded, x_encoded = self.model(x0)
-                #x_decoded comes back channels last
-                #x_decoded = x_decoded.permute(0, 2, 1)
-                #print(True in x0.detach() < 0)
-                #print(True in x0.detach() > 1)
+                
                 loss = self.criterion(x0, x_decoded)
                 total_loss += loss.detach()
                 loss.backward()

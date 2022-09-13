@@ -11,6 +11,18 @@ from utils import augmentation
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cosine
 
+def compute_apparent_clusterability(
+    fet : np.ndarray,
+    y   : np.ndarray,
+):
+    """
+    Compute that percentage of instances in the feature space that
+    share a label with their 2 nearest neighbors
+    """
+    neigh = NearestNeighbors(n_neighbors=2, radius=1.0, metric=cosine)
+    neigh.fit(fet)
+    print(neigh)
+
 def KNNLabel(
     fet: np.ndarray,
     y: np.ndarray,
@@ -82,5 +94,6 @@ if __name__ == '__main__':
     ])
 
     y = np.array([0, 0, 0, 1, 1])
-    y_clean = simiFeat(10, 2, X, y, "vote")
+    compute_apparent_clusterability(X, y)
+    #y_clean = simiFeat(10, 2, X, y, "vote")
 
