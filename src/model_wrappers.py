@@ -85,7 +85,7 @@ class ArgHolder():
         self.cases = ""
         self.criterion = criterion
         self.weight_decay = 1e-5
-        self.aug1 = "t_flip"
+        self.aug1 = "negate"
         self.aug2 = "noise"
         self.n_feature = EMBEDDING_WIDTH
         self.n_class = n_class

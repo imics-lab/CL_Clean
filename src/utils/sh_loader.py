@@ -15,8 +15,12 @@ else:
 
 def sh_loco_load_dataset(incl_xyz_accel=True, incl_rms_accel=False, incl_val_group=False):
     X = np.load(path+'x_train.npy')
+    if not incl_rms_accel:
+        X = np.delete(X, 3, 2)
     y = np.load(path+'y_train.npy')
     X_test = np.load(path+'x_test.npy')
+    if not incl_rms_accel:
+        X_test = np.delete(X_test, 3, 2)
     y_test = np.load(path+'y_test.npy')
     if not incl_val_group:
         return  X, y, X_test, y_test
