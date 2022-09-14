@@ -7,7 +7,7 @@
 import os
 from torch import Tensor
 import numpy as np
-from model_wrappers import Engineered_Features, Conv_Autoencoder, SimCLR_C, SimCLR_T, NNCLR_C, NNCLR_T
+from model_wrappers import Engineered_Features, Conv_Autoencoder, SimCLR_C, SimCLR_T, NNCLR_C, NNCLR_T, Supervised_C
 from model_wrappers import SimCLR_R, NNCLR_R
 import umap.umap_ as umap
 from load_data_time_series.HAR.e4_wristband_Nov2019.e4_load_dataset import e4_load_dataset
@@ -25,20 +25,28 @@ umap_dim = 3
 class None_Extractor():
     def __init__(self,X, y): pass
     def fit(self, X, y, Xv, yv): pass
-    def get_features(self, X): 
-        return np.reshape(X, (X.shape[0], X.shape[2]))
+    def get_features(self, X):
+        if X.ndim == 2:
+            return X
+        else:
+            if X.shape[1] == 1: 
+                return np.reshape(X, (X.shape[0], X.shape[2]))
+            else:
+                return np.array([np.linalg.norm(i, axis=0) for i in X])
+        
 
 
 feature_learners = {
-    #"none" : None_Extractor,
-    #"traditional" : Engineered_Features,
+    "none" : None_Extractor,
+    "traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
     "SimCLR + CNN" : SimCLR_C,
     "SimCLR + T" : SimCLR_T,
-    #"SimCLR + LSTM" : SimCLR_R,
+    "SimCLR + LSTM" : SimCLR_R,
     "NNCLR + CNN" : NNCLR_C,
     "NNCLR + T" : NNCLR_T,
-    #"NNCLR + LSTM" : NNCLR_R
+    "NNCLR + LSTM" : NNCLR_R,
+    "Supervised Convolutional" : Supervised_C
 }
 
 datasets = {
@@ -63,7 +71,7 @@ if __name__ == '__main__':
     for set in datasets.keys():
         ### Fetch Dataset ###
         X_train, y_train, X_val, y_val, X_test, y_test = datasets[set](
-            incl_xyz_accel=False, incl_rms_accel=True, incl_val_group=True
+            incl_xyz_accel=True, incl_rms_accel=False, incl_val_group=True
         )
 
         ### Channels first and flatten labels
@@ -87,11 +95,11 @@ if __name__ == '__main__':
             extractor = feature_learners[extractor_name](X_train, y_train)
             extractor.fit(X_train, y_train, X_val, y_val)
 
-            features_1_train = extractor.get_features(X_train)
-            #features_1_test = extractor.get_features(X_test)
+            features_train = extractor.get_features(X_train)
+            #features_test = extractor.get_features(X_test)
 
             reducer = umap.UMAP(n_neighbors=umap_neighbors, n_components=umap_dim)
-            embedding = reducer.fit_transform(features_1_train)
+            embedding = reducer.fit_transform(features_train)
 
             plt.figure()
             if umap_dim==2:
@@ -103,7 +111,7 @@ if __name__ == '__main__':
             plt.savefig(f'imgs/{set}_with_{extractor_name}.pdf')
             del extractor
             del reducer
-            del features_1_train
+            del features_train
 
 
 

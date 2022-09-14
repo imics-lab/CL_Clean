@@ -7,14 +7,16 @@
 #####################################################################
 #Supported Feature Learners:
 #  Engineered_Features -> Engineerd using signal processing
-#  SimCLR_C -> SimCLR w/ CNN encoder
-#  SimCLR_T -> SimCLR w/ Transformer encoder
-#  SimCLR_R -> SimCLR w/ Convolutional LSTM encoder
-#  NNCLR_C  -> NNCLR w/ CNN encoder
-#  NNCLR_T  -> NNCLR w/ Transformer encoder
-#  NNCLR_R  -> NNCLR w/ Covolutional LSTM encoder
+#  SimCLR_C     -> SimCLR w/ CNN encoder
+#  SimCLR_T     -> SimCLR w/ Transformer encoder
+#  SimCLR_R     -> SimCLR w/ Convolutional LSTM encoder
+#  NNCLR_C      -> NNCLR w/ CNN encoder
+#  NNCLR_T      -> NNCLR w/ Transformer encoder
+#  NNCLR_R      -> NNCLR w/ Covolutional LSTM encoder
+#  Supervised_C -> Supervised learning w/ CNN encoder
 #####################################################################
 
+from multiprocessing import reduction
 from operator import mod
 import os
 from CL_HAR.models import backbones, frameworks, attention
@@ -35,7 +37,7 @@ SLIDING_WINDIW = 128
 LR = 0.001
 WEIGHT_DECAY = 0
 NN_MEM = 1024
-CL_EPOCHS = 15 #80
+CL_EPOCHS = 120
 
 LOG = _logger('temp/train_log.txt')
 
@@ -59,8 +61,10 @@ class EarlyStopping():
     def __call__(self, train_loss):
         self.losses.append(train_loss)
         if len(self.losses) == self.patience:
-            if np.max(self.losses) - train_loss > self.min_delta:
+            if np.nanmax(self.losses) - train_loss < self.min_delta:
                 self.counter += 1
+            else:
+                self.counter = 0
             if self.counter == self.patience:
                 self.early_stop = True
             self.losses = self.losses[1:]
@@ -85,8 +89,8 @@ class ArgHolder():
         self.cases = ""
         self.criterion = criterion
         self.weight_decay = 1e-5
-        self.aug1 = "negate"
-        self.aug2 = "noise"
+        self.aug1 = "noise"
+        self.aug2 = "negate"
         self.n_feature = EMBEDDING_WIDTH
         self.n_class = n_class
         self.len_sw = SLIDING_WINDIW
@@ -130,7 +134,7 @@ class Engineered_Features():
         return get_features_for_set(X)
 
 
-class Conv_Autoencoder():
+class Conv_Autoencoder(nn.Module):
     def __init__(self, X, y) -> None:
         super(Conv_Autoencoder, self).__init__()
         self.model = backbones.CNN_AE(
@@ -138,49 +142,66 @@ class Conv_Autoencoder():
             n_channels=X.shape[1],
             n_classes=np.nanmax(y)+1,
             out_channels=EMBEDDING_WIDTH,
-            backbone=True
+            backbone=False
         )
         self.model = self.model.to(device)
-        self.criterion =  nn.BCELoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
-        self.patience = 7
-        self.max_epochs = 200
-        #This started as a typo, but I like it
-        #Bath == Batch
-        self.bath_size = 32
-        summary(self.model, X.shape[1:])
+        
+        self.args = ArgHolder(
+            n_epoch=100,
+            batch_size=32,
+            framework="",
+            model_name="",
+            criterion='mse',
+            n_class=np.nanmax(y)+1,
+        )
+
+        self.criterion = nn.MSELoss()
+        self.optimizer = torch.optim.Adam(self.model.parameters())
 
 
     def fit(self, X_train, y_train=None, X_val=None, y_val=None) -> None:
         """
         Train cycle with early stopping
         """
-        train_torch_X = torch.Tensor(X_train)
-        train_torch_y = torch.Tensor(y_train)
-        train_dataset = torch.utils.data.TensorDataset(train_torch_X, train_torch_y)
-        train_dataloader = DataLoader(
-            dataset=train_dataset, batch_size = self.bath_size, shuffle=False, drop_last=True
-        )
-        early_stopping = EarlyStopping(tolerance=self.patience, min_delta=0.1)
-        self.model.to(device)
-        for epoch in range(self.max_epochs):
-            print("Epoch: ", epoch, end='.')
+        train_loader = setup_dataloader(X_train, y_train)
+        val_loader = setup_dataloader(X_val, y_val)
+        es = EarlyStopping(tolerance=10, min_delta=0.001)
+        for epoch in range(self.args.n_epoch):
+            print(f'Epoch {epoch}:')
             total_loss = 0
-            for x0, y0 in train_dataloader:
+            val_loss = 0
+            for i, (x0, y0, d) in enumerate(train_loader):
+                self.optimizer.zero_grad()
                 x0 = x0.to(device)
-                x_decoded, x_encoded = self.model(x0)
-                
-                loss = self.criterion(x0, x_decoded)
-                total_loss += loss.detach()
+                y0 = y0.type(torch.LongTensor)
+                y0 = y0.to(device)
+                if x0.size(0) != self.args.batch_size:
+                    continue
+                out, f = self.model(x0)
+                loss = self.criterion(out, x0)
+                total_loss += loss.item()
+                total_loss /= self.args.batch_size
                 loss.backward()
                 self.optimizer.step()
-                self.optimizer.zero_grad()
-                
-            avg_loss = total_loss.detach()/len(train_dataloader)
-            print('Train Loss: ', avg_loss.detach())
-            early_stopping(avg_loss)
-            if early_stopping.early_stop:
-                print("Stopping early")
+                if i%4 == 0: print('.', end='')
+            print('\n')
+            with torch.no_grad():
+                for (x1, y1, d) in val_loader:
+                    x1 = x1.to(device)
+                    y1 = y1.type(torch.LongTensor)
+                    y1 = y1.to(device)
+                    out, f = self.model(x1)
+                    loss = self.criterion(out, x1)
+                    val_loss += loss.item()
+                    val_loss /= self.args.batch_size
+            es(val_loss)
+            if es.early_stop:
+                print(f'Stopping early at epoch {epoch}')
+                return
+
+            print('Train loss: ', total_loss)
+            print('Validation loss: ', val_loss)
+
     
 
     def get_features(self, X) -> np.ndarray:
@@ -434,9 +455,10 @@ class NNCLR_R(NNCLR):
         else:
             return np.nanmax(fet.detach().numpy(), axis=2)
 
-class Supervised_Convolutional(nn.Module):
+class Supervised_C(nn.Module):
     def __init__(self, X, y=None) -> None:
-        self.encoder = nn.Sequential(nn.Conv1d(X.shape[2], 32, kernel_size=8, stride=1, bias=False, padding=4),
+        super(Supervised_C, self).__init__()
+        self.encoder = nn.Sequential(nn.Conv1d(X.shape[1], 32, kernel_size=8, stride=1, bias=False, padding=4),
                                         nn.BatchNorm1d(32),
                                         nn.ReLU(),
                                         nn.MaxPool1d(kernel_size=2, stride=2, padding=1),
@@ -449,21 +471,81 @@ class Supervised_Convolutional(nn.Module):
                                         nn.BatchNorm1d(EMBEDDING_WIDTH),
                                         nn.ReLU(),
                                         nn.MaxPool1d(kernel_size=2, stride=2, padding=1),
-                                        nn.AdaptiveAvgPool1d(EMBEDDING_WIDTH))
+                                        nn.Flatten(),
+                                        nn.AdaptiveAvgPool1d(EMBEDDING_WIDTH)                        
+            )
         
         self.n_classes = np.nanmax(y) + 1
-        self.classifier_block = nn.Linear(EMBEDDING_WIDTH, self.n_classes)
+        self.classifier_block = nn.Linear(EMBEDDING_WIDTH, out_features=self.n_classes)
 
         self.model = nn.Sequential(self.encoder, self.classifier_block)
-
+        self.model = self.model.to(device)
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.Adam(self.model.parameters())
+        
+        self.args = ArgHolder(100, 32, "", "", "", self.n_classes)
 
-        self.model = self.model.to(device)
+    def fit(self, X_train, y_train=None, X_val=None, y_val=None) -> None:
+        """
+        Train cycle with early stopping
+        """
+        train_loader = setup_dataloader(X_train, y_train, self.args)
+        val_loader = setup_dataloader(X_val, y_val, self.args)
+        es = EarlyStopping(tolerance=10, min_delta=0.001)
+        for epoch in range(self.args.n_epoch):
+            print(f'Epoch {epoch}:')
+            total_loss = 0
+            val_loss = 0
+            for i, (x0, y0, d) in enumerate(train_loader):
+                self.optimizer.zero_grad()
+                x0 = x0.to(device)
+                y0 = y0.type(torch.LongTensor)
+                y0 = y0.to(device)
+                if x0.size(0) != self.args.batch_size:
+                    continue
+                f0 = self.encoder(x0)
+                out = self.classifier_block(f0)
+                loss = self.criterion(out, y0)
+                total_loss += loss.item()
+                total_loss /= self.args.batch_size
+                loss.backward()
+                self.optimizer.step()
+                if i%4 == 0: print('.', end='')
+            print('\n')
+            with torch.no_grad():
+                for (x1, y1, d) in val_loader:
+                    x1 = x1.to(device)
+                    y1 = y1.type(torch.LongTensor)
+                    y1 = y1.to(device)
+                    f1 = self.encoder(x1)
+                    y_pred = self.classifier_block(f1)
+                    loss = self.criterion(y_pred, y1)
+                    val_loss += loss.item()
+                    val_loss /= self.args.batch_size
+            es(val_loss)
+            if es.early_stop:
+                print(f'Stopping early at epoch {epoch}')
+                return
 
-    def fit(self, X_train, y_train, X_val, y_val) -> None:
-        pass
+            print('Train loss: ', total_loss)
+            print('Validation loss: ', val_loss)
+
+
+
 
     def get_features(self, X) -> np.ndarray:
-        pass
+        dataloader = setup_dataloader(X, np.zeros(X.shape[0]), self.args)
+        fet = None
+        with torch.no_grad():
+            for x, y, d in dataloader:
+                x = x.to(device).float()
+                f = self.encoder(x)
+                if fet is None:
+                    fet = f
+                else:
+                    fet = torch.cat((fet, f))
+        if device == 'cuda':
+            return fet.detach().cpu().numpy()
+        else:
+            return fet.detach().numpy()
 
