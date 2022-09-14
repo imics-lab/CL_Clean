@@ -17,11 +17,19 @@ def compute_apparent_clusterability(
 ):
     """
     Compute that percentage of instances in the feature space that
-    share a label with their 2 nearest neighbors
+    share an assigned label with their 2 nearest neighbors
     """
     neigh = NearestNeighbors(n_neighbors=2, radius=1.0, metric=cosine)
     neigh.fit(fet)
-    print(neigh)
+    clusterable_count = 0
+    for i,f in enumerate(fet):
+        #compute 3 nearest neighbors, discard 1st
+        n = neigh.kneighbors(f, 3, return_distance=False)
+        n = n[1:]
+        if y[i] == y[n[0]] == y[n[1]]:
+            clusterable_count += 1
+    return clusterable_count/fet.shape[0]
+
 
 def KNNLabel(
     fet: np.ndarray,

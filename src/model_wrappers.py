@@ -14,6 +14,7 @@
 #  NNCLR_T      -> NNCLR w/ Transformer encoder
 #  NNCLR_R      -> NNCLR w/ Covolutional LSTM encoder
 #  Supervised_C -> Supervised learning w/ CNN encoder
+#  Conv_AE      -> Convolutional Autoencoder
 #####################################################################
 
 from multiprocessing import reduction
@@ -29,14 +30,13 @@ from torch.utils.data import DataLoader
 import multiprocessing
 from torchsummary import summary
 from CL_HAR.utils import _logger
-import fitlog
 
 
 EMBEDDING_WIDTH = 96
 SLIDING_WINDIW = 128
 LR = 0.001
-WEIGHT_DECAY = 0
-NN_MEM = 1024
+WEIGHT_DECAY = 1e-5
+NN_MEM = 1024 #size in megabytes
 CL_EPOCHS = 120
 
 LOG = _logger('temp/train_log.txt')
@@ -84,7 +84,7 @@ class ArgHolder():
         self.n_epoch = n_epoch
         self.batch_size  = batch_size
         self.framework = framework
-        self.model_name = model_name
+        self.model_name = framework + ' ' + model_name
         self.backbone = model_name
         self.cases = ""
         self.criterion = criterion
@@ -134,9 +134,9 @@ class Engineered_Features():
         return get_features_for_set(X)
 
 
-class Conv_Autoencoder(nn.Module):
+class Conv_AE(nn.Module):
     def __init__(self, X, y) -> None:
-        super(Conv_Autoencoder, self).__init__()
+        super(Conv_AE, self).__init__()
         self.model = backbones.CNN_AE(
             #channels first right?
             n_channels=X.shape[1],
