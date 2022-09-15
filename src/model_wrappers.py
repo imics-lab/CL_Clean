@@ -32,7 +32,7 @@ from torchsummary import summary
 from CL_HAR.utils import _logger
 
 
-EMBEDDING_WIDTH = 96
+EMBEDDING_WIDTH = 64
 SLIDING_WINDIW = 128
 LR = 0.001
 WEIGHT_DECAY = 1e-5
@@ -41,7 +41,8 @@ CL_EPOCHS = 120
 
 LOG = _logger('temp/train_log.txt')
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu" if torch.cuda.is_available() else "cpu"
+
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 
@@ -142,7 +143,8 @@ class Conv_AE(nn.Module):
             n_channels=X.shape[1],
             n_classes=np.nanmax(y)+1,
             out_channels=EMBEDDING_WIDTH,
-            backbone=False
+            #backbone should be true to get encoded values out
+            backbone=True
         )
         self.model = self.model.to(device)
         
@@ -163,8 +165,8 @@ class Conv_AE(nn.Module):
         """
         Train cycle with early stopping
         """
-        train_loader = setup_dataloader(X_train, y_train)
-        val_loader = setup_dataloader(X_val, y_val)
+        train_loader = setup_dataloader(X_train,  np.zeros(X_train.shape[0]), self.args)
+        val_loader = setup_dataloader(X_val,  np.zeros(X_val.shape[0]), self.args)
         es = EarlyStopping(tolerance=10, min_delta=0.001)
         for epoch in range(self.args.n_epoch):
             print(f'Epoch {epoch}:')
@@ -178,12 +180,15 @@ class Conv_AE(nn.Module):
                 if x0.size(0) != self.args.batch_size:
                     continue
                 out, f = self.model(x0)
+                out = nn.functional.sigmoid(out)
+                x0 = nn.functional.sigmoid(x0)
                 loss = self.criterion(out, x0)
-                total_loss += loss.item()
-                total_loss /= self.args.batch_size
                 loss.backward()
                 self.optimizer.step()
+
+                total_loss += loss.item()
                 if i%4 == 0: print('.', end='')
+            total_loss /= self.args.batch_size
             print('\n')
             with torch.no_grad():
                 for (x1, y1, d) in val_loader:
@@ -191,9 +196,9 @@ class Conv_AE(nn.Module):
                     y1 = y1.type(torch.LongTensor)
                     y1 = y1.to(device)
                     out, f = self.model(x1)
-                    loss = self.criterion(out, x1)
+                    loss = self.criterion(nn.Sigmoid(out), nn.Sigmoid(x1))
                     val_loss += loss.item()
-                    val_loss /= self.args.batch_size
+            val_loss /= self.args.batch_size
             es(val_loss)
             if es.early_stop:
                 print(f'Stopping early at epoch {epoch}')
@@ -205,6 +210,16 @@ class Conv_AE(nn.Module):
     
 
     def get_features(self, X) -> np.ndarray:
+        dataloader = setup_dataloader(X, np.zeros(X.shape[0]), self.args)
+        fet = None
+        with torch.no_grad():
+            for x, y, d in dataloader:
+                x = x.to(device).float()
+                _, f = self.model.encoder(x)
+                if fet is None:
+                    fet = f
+                else:
+                    fet = torch.cat((fet, f))
         if device == 'cuda':
             return self.model(X).cpu().detach().numpy()
         else:
@@ -507,10 +522,11 @@ class Supervised_C(nn.Module):
                 out = self.classifier_block(f0)
                 loss = self.criterion(out, y0)
                 total_loss += loss.item()
-                total_loss /= self.args.batch_size
+                
                 loss.backward()
                 self.optimizer.step()
                 if i%4 == 0: print('.', end='')
+            total_loss /= self.args.batch_size
             print('\n')
             with torch.no_grad():
                 for (x1, y1, d) in val_loader:
@@ -521,7 +537,7 @@ class Supervised_C(nn.Module):
                     y_pred = self.classifier_block(f1)
                     loss = self.criterion(y_pred, y1)
                     val_loss += loss.item()
-                    val_loss /= self.args.batch_size
+            val_loss /= self.args.batch_size
             es(val_loss)
             if es.early_stop:
                 print(f'Stopping early at epoch {epoch}')

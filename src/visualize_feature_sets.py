@@ -7,7 +7,7 @@
 import os
 from torch import Tensor
 import numpy as np
-from model_wrappers import Engineered_Features, Conv_Autoencoder, SimCLR_C, SimCLR_T, NNCLR_C, NNCLR_T, Supervised_C
+from model_wrappers import Engineered_Features, Conv_AE, SimCLR_C, SimCLR_T, NNCLR_C, NNCLR_T, Supervised_C
 from model_wrappers import SimCLR_R, NNCLR_R
 import umap.umap_ as umap
 from load_data_time_series.HAR.e4_wristband_Nov2019.e4_load_dataset import e4_load_dataset
@@ -37,16 +37,16 @@ class None_Extractor():
 
 
 feature_learners = {
-    "none" : None_Extractor,
-    "traditional" : Engineered_Features,
-    #"CAE" : Conv_Autoencoder,
-    "SimCLR + CNN" : SimCLR_C,
-    "SimCLR + T" : SimCLR_T,
-    "SimCLR + LSTM" : SimCLR_R,
-    "NNCLR + CNN" : NNCLR_C,
-    "NNCLR + T" : NNCLR_T,
-    "NNCLR + LSTM" : NNCLR_R,
-    "Supervised Convolutional" : Supervised_C
+    #"none" : None_Extractor,
+    #"traditional" : Engineered_Features,
+    "CAE" : Conv_AE,
+    #"SimCLR + CNN" : SimCLR_C,
+    #"SimCLR + T" : SimCLR_T,
+    #"SimCLR + LSTM" : SimCLR_R,
+    #"NNCLR + CNN" : NNCLR_C,
+    #"NNCLR + T" : NNCLR_T,
+    #"NNCLR + LSTM" : NNCLR_R,
+    #"Supervised Convolutional" : Supervised_C
 }
 
 datasets = {
