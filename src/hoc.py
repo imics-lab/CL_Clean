@@ -3,7 +3,7 @@
 import torch
 import torch.nn.functional as F
 
-from utils import *
+from hoc_utils import *
 
 
 def get_T_HOC(config, model, train_dataloader_EF, rnd, test_flag=False, max_step=501, T0=None, p0=None, lr=0.1):
