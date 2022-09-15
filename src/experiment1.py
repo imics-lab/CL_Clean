@@ -22,8 +22,9 @@ import os
 from torch import Tensor
 import numpy as np
 from utils.add_nar import add_nar_from_array
-from model_wrappers import Engineered_Features, Conv_Autoencoder, SimCLR_C, SimCLR_T, NNCLR_C, NNCLR_T
+from model_wrappers import Engineered_Features, Conv_AE, SimCLR_C, SimCLR_T, NNCLR_C, NNCLR_T, Supervised_C
 from model_wrappers import SimCLR_R, NNCLR_R
+from cleaner import compute_apparent_clusterability
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
@@ -31,14 +32,15 @@ K = 5
 WRITE_FEATURES = False
 
 feature_learners = {
-    "traditional" : Engineered_Features,
+    #"traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
-    "SimCLR + CNN" : SimCLR_C,
-    "SimCLR + T" : SimCLR_T,
-    "SimCLR + LSTM" : SimCLR_R,
-    "NNCLR + CNN" : NNCLR_C,
-    "NNCLR + T" : NNCLR_T,
-    "NNCLR + LSTM" : NNCLR_R
+    #"SimCLR + CNN" : SimCLR_C,
+    #"SimCLR + T" : SimCLR_T,
+    #"SimCLR + LSTM" : SimCLR_R,
+    #"NNCLR + CNN" : NNCLR_C,
+    #"NNCLR + T" : NNCLR_T,
+    #"NNCLR + LSTM" : NNCLR_R,
+    "Supervised Convolutional" : Supervised_C
 }
 
 def exp_1(
@@ -64,7 +66,9 @@ def exp_1(
         'P(mispred)' : [],
         'P(mispred|correct)' : [],
         'P(mispred|incorrect)' : [],
-        'P(pred label = class)' : []
+        'P(pred label = class)' : [],
+        'train clusterability' : [],
+        'test clusterability' : []
     }
 
     print ("Running Experiment 1 with K=", K, " on ", set)
@@ -179,6 +183,8 @@ def exp_1(
             results['P(mispred|incorrect)'].append(count_mispred_given_inc / count_inc if count_inc != 0 else 0)
             results['P(pred label = class)'].append(count_lab_equals_class/num_instances)
             results['number mislabeled'].append(count_inc)
+            results['train clusterability'].append(compute_apparent_clusterability(f_train, y_train))
+            results['test clusterability'].append(compute_apparent_clusterability(f_test, y_test))
         # End for noise level
     #End for feature extractor
 

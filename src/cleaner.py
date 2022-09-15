@@ -5,7 +5,7 @@
 #KNN-based noisy label detection based on:
 #  https://arxiv.org/abs/2110.06283
 
-from tkinter import N
+
 import numpy as np
 from utils import augmentation
 from sklearn.neighbors import NearestNeighbors
@@ -19,15 +19,17 @@ def compute_apparent_clusterability(
     Compute that percentage of instances in the feature space that
     share an assigned label with their 2 nearest neighbors
     """
-    neigh = NearestNeighbors(n_neighbors=2, radius=1.0, metric=cosine)
+    neigh = NearestNeighbors(n_neighbors=3, radius=1.0, metric='minkowski', n_jobs=8)
     neigh.fit(fet)
     clusterable_count = 0
-    for i,f in enumerate(fet):
-        #compute 3 nearest neighbors, discard 1st
-        n = neigh.kneighbors(f, 3, return_distance=False)
-        n = n[1:]
-        if y[i] == y[n[0]] == y[n[1]]:
+    n = neigh.kneighbors(fet, 3, return_distance=False)
+    print('.', end='\n')
+    n = np.delete(n, 0, axis=1)
+    for i in range(len(fet)):
+        if y[i] == y[n[i][0]] == y[n[i][1]]:
             clusterable_count += 1
+    print('.', end='\n')
+    
     return clusterable_count/fet.shape[0]
 
 
