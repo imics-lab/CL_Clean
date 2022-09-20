@@ -32,15 +32,15 @@ K = 5
 WRITE_FEATURES = False
 
 feature_learners = {
-    "traditional" : Engineered_Features,
+    #"traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
-    "SimCLR + CNN" : SimCLR_C,
+    #"SimCLR + CNN" : SimCLR_C,
     "SimCLR + T" : SimCLR_T,
-    "SimCLR + LSTM" : SimCLR_R,
-    "NNCLR + CNN" : NNCLR_C,
+    #"SimCLR + LSTM" : SimCLR_R,
+    #"NNCLR + CNN" : NNCLR_C,
     "NNCLR + T" : NNCLR_T,
-    "NNCLR + LSTM" : NNCLR_R,
-    "Supervised Convolutional" : Supervised_C
+    #"NNCLR + LSTM" : NNCLR_R,
+    #"Supervised Convolutional" : Supervised_C
 }
 
 def exp_1(
