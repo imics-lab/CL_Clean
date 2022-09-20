@@ -30,6 +30,7 @@ from torch.utils.data import DataLoader
 import multiprocessing
 from torchsummary import summary
 from CL_HAR.utils import _logger
+from early_stopping import EarlyStopping
 
 
 EMBEDDING_WIDTH = 64
@@ -44,31 +45,6 @@ LOG = _logger('temp/train_log.txt')
 device = "cpu" if torch.cuda.is_available() else "cpu"
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
-
-
-#Shameless theft: https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
-class EarlyStopping():
-    """
-    Set early_stop flag to True if tolerance cycles have passed without adeqate change
-    """
-    def __init__(self, tolerance=5, min_delta=0.01):
-
-        self.patience = tolerance
-        self.min_delta = min_delta
-        self.counter = 0
-        self.early_stop = False
-        self.losses = list()
-
-    def __call__(self, train_loss):
-        self.losses.append(train_loss)
-        if len(self.losses) == self.patience:
-            if np.nanmax(self.losses) - train_loss < self.min_delta:
-                self.counter += 1
-            else:
-                self.counter = 0
-            if self.counter == self.patience:
-                self.early_stop = True
-            self.losses = self.losses[1:]
             
 class ArgHolder():
     """
@@ -498,7 +474,7 @@ class Supervised_C(nn.Module):
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.Adam(self.model.parameters())
         
-        self.args = ArgHolder(100, 32, "", "", "", self.n_classes)
+        self.args = ArgHolder(120, 32, "", "", "", self.n_classes)
 
     def fit(self, X_train, y_train=None, X_val=None, y_val=None) -> None:
         """
@@ -506,7 +482,7 @@ class Supervised_C(nn.Module):
         """
         train_loader = setup_dataloader(X_train, y_train, self.args)
         val_loader = setup_dataloader(X_val, y_val, self.args)
-        es = EarlyStopping(tolerance=10, min_delta=0.001)
+        es = EarlyStopping(tolerance=7, min_delta=0.01)
         for epoch in range(self.args.n_epoch):
             print(f'Epoch {epoch}:')
             total_loss = 0

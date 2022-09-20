@@ -11,7 +11,7 @@ class EarlyStopping():
     """
     Set early_stop flag to True if tolerance cycles have passed without adeqate change
     """
-    def __init__(self, tolerance=5, min_delta=0.01, mode='maximum'):
+    def __init__(self, tolerance=5, min_delta=0.01, mode='minimum'):
         assert mode in ['minimum', 'maximum'], "Mode must be minimum or maximum"
         self.patience = tolerance
         self.min_delta = min_delta
