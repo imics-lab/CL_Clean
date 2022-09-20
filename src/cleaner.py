@@ -7,6 +7,7 @@
 
 
 import numpy as np
+import torch
 from utils import augmentation
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cosine
@@ -30,6 +31,31 @@ def compute_apparent_clusterability(
             clusterable_count += 1
     print('.', end='\n')
     
+    return clusterable_count/fet.shape[0]
+
+# (x - y)^2 = x^2 - 2*x*y + y^2
+def similarity_matrix(mat: torch.Tensor):
+    # get the product x * y
+    # here, y = x.t()
+    r = torch.mm(mat, mat.t())
+    # get the diagonal elements
+    diag = r.diag().unsqueeze(0)
+    diag = diag.expand_as(r)
+    # compute the distance matrix
+    D = diag + diag.t() - 2*r
+    return D.sqrt()
+
+def compute_apparent_clusterability_torch(
+    fet : torch.Tensor,
+    y   : torch.Tensor
+):
+    mat = similarity_matrix(fet)
+    _, idx_1 = torch.kthvalue(mat, 2, dim=1)
+    _, idx_2 = torch.kthvalue(mat, 3, dim=1)
+    clusterable_count = 0
+    for i in range(idx_1.shape):
+        if y[i] == y[idx_1[i]] == y[idx_2[i]]:
+            clusterable_count+=1
     return clusterable_count/fet.shape[0]
 
 
