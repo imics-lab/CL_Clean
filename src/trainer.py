@@ -262,6 +262,7 @@ def calculate_model_loss(args, sample, target, model, criterion, DEVICE, recon=N
 def train(train_loaders, val_loader, model, logger, fitlog, DEVICE, optimizers, schedulers, criterion, args):
     best_model = None
     min_val_loss = 1e8
+    max_clstr = 0
 
     global nn_replacer
     nn_replacer = None
@@ -313,17 +314,23 @@ def train(train_loaders, val_loader, model, logger, fitlog, DEVICE, optimizers, 
             with torch.no_grad():
                 model.eval()
                 total_loss = 0
+                total_clstr = 0
                 n_batches = 0
                 for idx, (sample, target, domain) in enumerate(val_loader):
                     if sample.size(0) != args.batch_size:
                         continue
                     n_batches += 1
-                    loss = calculate_model_loss(args, sample, target, model, criterion, DEVICE, recon=recon, nn_replacer=nn_replacer)
+                    clstr, loss = calculate_model_loss(args, sample, target, model, criterion, DEVICE, recon=recon, nn_replacer=nn_replacer, return_clusterability=True)
                     total_loss += loss.item()
+                    total_clstr += clstr
                 # if total_loss <= min_val_loss:
                 #     min_val_loss = total_loss
                 #     best_model = copy.deepcopy(model.state_dict())
+                if total_clstr >= max_clstr:
+                    max_clstr = total_clstr
+                    best_model = copy.deepcopy(model.state_dict())
                 logger.debug(f'Val Loss     : {total_loss / n_batches:.4f}')
+                logger.debug(f'Clusterability     : {total_clstr / n_batches:.4f}')
                 fitlog.add_loss(total_loss / n_batches, name="pretrain validation loss", step=epoch)
     return best_model
 
