@@ -20,8 +20,8 @@
 from multiprocessing import reduction
 from operator import mod
 import os
-from CL_HAR.models import backbones, frameworks, attention
-from CL_HAR import trainer
+from models import backbones, frameworks, attention
+import trainer
 import torch
 import numpy as np
 from torch import nn
@@ -29,7 +29,7 @@ from utils.ts_feature_toolkit import get_features_for_set
 from torch.utils.data import DataLoader
 import multiprocessing
 from torchsummary import summary
-from CL_HAR.utils import _logger
+from har_util import _logger
 from early_stopping import EarlyStopping
 
 
