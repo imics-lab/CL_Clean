@@ -18,6 +18,7 @@ from experiment3 import exp_3
 import numpy as np
 import pandas as pd
 import os
+import torch
 
 CLEANUP = True
 
@@ -67,6 +68,9 @@ if __name__ == '__main__':
     """
     Run each experiment on each dataset, so... 12?
     """
+    torch.manual_seed(1899)
+    np.random.seed(1899)
+
     NOW = datetime.now()
 
     for set in datasets.keys():

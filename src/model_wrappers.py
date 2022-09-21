@@ -39,6 +39,8 @@ LR = 0.001
 WEIGHT_DECAY = 1e-5
 NN_MEM = 1024 #size in megabytes
 CL_EPOCHS = 120
+NUM_WORKERS = 16
+BATCH_SIZE = 128
 
 LOG = _logger('temp/train_log.txt')
 
@@ -93,7 +95,8 @@ def setup_dataloader(X : np.ndarray, y : np.ndarray, args : ArgHolder):
 
     dataset = torch.utils.data.TensorDataset(torch_X, torch_y, torch_d)
     dataloader = DataLoader(
-        dataset=dataset, batch_size = args.batch_size, shuffle=False, drop_last=False
+        dataset=dataset, batch_size = args.batch_size, shuffle=False, 
+        drop_last=False, num_workers=NUM_WORKERS
     )
     return dataloader
 
@@ -474,7 +477,13 @@ class Supervised_C(nn.Module):
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.Adam(self.model.parameters())
         
-        self.args = ArgHolder(120, 32, "", "", "", self.n_classes)
+        self.args = ArgHolder(
+            n_epoch=120,
+            batch_size=BATCH_SIZE,
+            framework="",
+            model_name="Supervised CNN", 
+            criterion="", 
+            n_class=self.n_classes)
 
     def fit(self, X_train, y_train=None, X_val=None, y_val=None) -> None:
         """
