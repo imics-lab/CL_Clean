@@ -12,6 +12,7 @@ from models.loss import *
 from data_preprocess import data_preprocess_ucihar
 from data_preprocess import data_preprocess_shar
 from data_preprocess import data_preprocess_hhar
+from cleaner import compute_apparent_clusterability_torch
 
 from sklearn.metrics import f1_score
 import seaborn as sns
@@ -207,11 +208,12 @@ def setup(args, DEVICE):
     return model, optimizers, schedulers, criterion, logger, fitlog, classifier, criterion_cls, optimizer_cls
 
 
-def calculate_model_loss(args, sample, target, model, criterion, DEVICE, recon=None, nn_replacer=None):
+def calculate_model_loss(args, sample, target, model, criterion, DEVICE, recon=None, nn_replacer=None, return_clusterability=False):
     aug_sample1 = gen_aug(sample, args.aug1)
     aug_sample2 = gen_aug(sample, args.aug2)
     aug_sample1, aug_sample2, target = aug_sample1.to(DEVICE).float(), aug_sample2.to(DEVICE).float(), target.to(
         DEVICE).long()
+    clstr = -1
     if args.framework in ['byol', 'simsiam']:
         assert args.criterion == 'cos_sim'
     if args.framework in ['tstcc', 'simclr', 'nnclr']:
@@ -231,6 +233,9 @@ def calculate_model_loss(args, sample, target, model, criterion, DEVICE, recon=N
             loss = (criterion(p1, z2) + criterion(p2, z1)) * 0.5
         if args.backbone in ['AE', 'CNN_AE']:
             loss = loss * args.lambda1 + recon_loss * args.lambda2
+        clstr = compute_apparent_clusterability_torch(z1, target)
+        clstr += compute_apparent_clusterability_torch(z2, target)
+        clstr /= 2
     if args.framework == 'simclr':
         if args.backbone in ['AE', 'CNN_AE']:
             x1_encoded, x2_encoded, z1, z2 = model(x1=aug_sample1, x2=aug_sample2)
@@ -240,12 +245,18 @@ def calculate_model_loss(args, sample, target, model, criterion, DEVICE, recon=N
         loss = criterion(z1, z2)
         if args.backbone in ['AE', 'CNN_AE']:
             loss = loss * args.lambda1 + recon_loss * args.lambda2
+        clstr = compute_apparent_clusterability_torch(z1, target)
+        clstr += compute_apparent_clusterability_torch(z2, target)
+        clstr /= 2
     if args.framework == 'tstcc':
         nce1, nce2, p1, p2 = model(x1=aug_sample1, x2=aug_sample2)
         tmp_loss = nce1 + nce2
         ctx_loss = criterion(p1, p2)
         loss = tmp_loss * args.lambda1 + ctx_loss * args.lambda2
-    return loss
+    if return_clusterability:
+        return clstr, loss
+    else:
+        return loss
 
 
 def train(train_loaders, val_loader, model, logger, fitlog, DEVICE, optimizers, schedulers, criterion, args):
@@ -309,10 +320,9 @@ def train(train_loaders, val_loader, model, logger, fitlog, DEVICE, optimizers, 
                     n_batches += 1
                     loss = calculate_model_loss(args, sample, target, model, criterion, DEVICE, recon=recon, nn_replacer=nn_replacer)
                     total_loss += loss.item()
-                if total_loss <= min_val_loss:
-                    min_val_loss = total_loss
-                    best_model = copy.deepcopy(model.state_dict())
-                    print('update')
+                # if total_loss <= min_val_loss:
+                #     min_val_loss = total_loss
+                #     best_model = copy.deepcopy(model.state_dict())
                 logger.debug(f'Val Loss     : {total_loss / n_batches:.4f}')
                 fitlog.add_loss(total_loss / n_batches, name="pretrain validation loss", step=epoch)
     return best_model

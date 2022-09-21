@@ -129,7 +129,7 @@ class Conv_AE(nn.Module):
         
         self.args = ArgHolder(
             n_epoch=100,
-            batch_size=32,
+            batch_size=BATCH_SIZE,
             framework="",
             model_name="",
             criterion='mse',
@@ -212,7 +212,7 @@ class SimCLR(nn.Module):
 
         self.args = ArgHolder(
             n_epoch=CL_EPOCHS,
-            batch_size=32,
+            batch_size=BATCH_SIZE,
             framework="simclr",
             model_name='FCN' if backbone=='CNN' else backbone,
             criterion="NTXent",
@@ -338,7 +338,7 @@ class NNCLR(nn.Module):
 
         self.args = ArgHolder(
             n_epoch=CL_EPOCHS,
-            batch_size=32,
+            batch_size=BATCH_SIZE,
             framework="nnclr",
             model_name='FCN' if backbone=='CNN' else backbone,
             criterion="NTXent",
