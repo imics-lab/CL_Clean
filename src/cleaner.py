@@ -34,7 +34,7 @@ def compute_apparent_clusterability_torch(
     _, idx_1 = torch.kthvalue(mat, 2, dim=1)
     _, idx_2 = torch.kthvalue(mat, 3, dim=1)
     clusterable_count = 0
-    for i in range(idx_1.shape):
+    for i in range(idx_1.shape[0]):
         if y[i] == y[idx_1[i]] == y[idx_2[i]]:
             clusterable_count+=1
     return clusterable_count/fet.shape[0]
@@ -135,6 +135,8 @@ if __name__ == '__main__':
     ])
 
     y = np.array([0, 0, 0, 1, 1])
-    compute_apparent_clusterability(X, y)
+    X = torch.Tensor(X)
+    y = torch.Tensor(y)
+    compute_apparent_clusterability_torch(X, y)
     #y_clean = simiFeat(10, 2, X, y, "vote")
 

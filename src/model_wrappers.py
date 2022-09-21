@@ -326,7 +326,7 @@ class SimCLR_R(SimCLR):
         if device == 'cuda':
             return fet.detach().cpu().numpy()
         else:
-            return np.nanmax(fet.detach().numpy(), axis=2)
+            return fet.detach().numpy()
 
 class NNCLR(nn.Module):
     def __init__(self, X, y=None, backbone='CNN') -> None:
