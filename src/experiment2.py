@@ -31,9 +31,6 @@ feature_learners = {
     #"Supervised Convolutional" : Supervised_C
 }
 
-noise_levels = ['low', 'high']
-percent_dic = {'low' : 5, 'high' : 10}
-
 def exp_2(
         X_train : np.ndarray,
         y_train : np.ndarray,
@@ -57,22 +54,20 @@ def exp_2(
     print ("Running Experiment 2  on ", set)
     print("Feature Extractors: ", ', '.join(feature_learners.keys()))
 
-    #For all noise levels
-    for noise_level in noise_levels:
-        #Check for noisey labels, make them if necesary
-        if os.path.exists(f'temp/{set}_test_labels_high_noise.npy'):
-            y_train_high = np.load(f'temp/{set}_train_labels_high_noise.npy', dtype='int')
-            y_val_high = np.load(f'temp/{set}_val_labels_high_noise.npy', dtype='int')
-            y_test_high = np.load(f'temp/{set}_test_labels_high_noise.npy', dtype='int')
+    #Check for noisey labels, make them if necesary
+    if os.path.exists(f'temp/{set}_test_labels_high_noise.npy'):
+        y_train_high = np.load(f'temp/{set}_train_labels_high_noise.npy', dtype='int')
+        y_val_high = np.load(f'temp/{set}_val_labels_high_noise.npy', dtype='int')
+        y_test_high = np.load(f'temp/{set}_test_labels_high_noise.npy', dtype='int')
 
-            y_train_low = np.load(f'temp/{set}_train_labels_low_noise.npy', dtype='int')
-            y_val_low = np.load(f'temp/{set}_val_labels_low_noise.npy', dtype='int')
-            y_test_low = np.load(f'temp/{set}_test_labels_low_noise.npy', dtype='int')
-        else:
-            num_classes = np.max(y_train)+1
-            y_train_low, _, y_train_high, _ = add_nar_from_array(y_train, num_classes)
-            y_val_low, _, y_val_high, _ = add_nar_from_array(y_val, num_classes)
-            y_test_low, _, y_test_high, _ = add_nar_from_array(y_test, num_classes)
+        y_train_low = np.load(f'temp/{set}_train_labels_low_noise.npy', dtype='int')
+        y_val_low = np.load(f'temp/{set}_val_labels_low_noise.npy', dtype='int')
+        y_test_low = np.load(f'temp/{set}_test_labels_low_noise.npy', dtype='int')
+    else:
+        num_classes = np.max(y_train)+1
+        y_train_low, _, y_train_high, _ = add_nar_from_array(y_train, num_classes)
+        y_val_low, _, y_val_high, _ = add_nar_from_array(y_val, num_classes)
+        y_test_low, _, y_test_high, _ = add_nar_from_array(y_test, num_classes)
 
     noise_dic = {
         'none' : {
@@ -94,4 +89,25 @@ def exp_2(
             'y_test' : y_test_high
         }
     }
+
+    #For all feature extractors and all noise levels
+    for extractor in feature_learners.keys():
+        for noise_level in noise_dic.keys():
+
+            y_train_noisy = noise_dic[noise_level]['y_train']
+            y_val_noisy = noise_dic[noise_level]['y_val']
+            y_test_noisy = noise_dic[noise_level]['y_test']
+
+            #Check for numpy file of feature
+            if os.path.exists(f'temp/{set}_{extractor}_features_train_{noise_level}_noise.npy'):
+                f_train = np.load(f'temp/{set}_{extractor}_features_train_{noise_level}_noise.npy', allow_pickle=True)
+            else:
+                f_learner = feature_learners[extractor](X_train, y=y_train_noisy)
+                f_learner.fit(X_train, y_train_noisy, X_val, y_val_noisy)
+                f_train = f_learner.get_features(X_train)
+
+            if os.path.exists(f'temp/{set}_{extractor}_features_test_{noise_level}_noise.npy'):
+                f_test = np.load(f'temp/{set}_{extractor}_features_test_{noise_level}_noise.npy', allow_pickle=True)
+            else:
+                f_test = f_learner.get_features(X_test)
         
