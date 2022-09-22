@@ -295,7 +295,9 @@ def simiFeat(
             sel_noisy_summary[nan_flag] = False
             print(
                 f'Found {sel_clean_summary.shape[0] - np.sum(sel_clean_summary) - np.sum(nan_flag * 1)} corrupted instances from {sel_clean_summary.shape[0] - np.sum(nan_flag * 1)} instances')
-            
+    
+    #figure out how to clean y
+    return y           
             
     
 

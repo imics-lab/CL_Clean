@@ -16,8 +16,10 @@
 
 import os
 import numpy as np
+from sklearn.metrics import precision_score, recall_score, f1_score
 from model_wrappers import Engineered_Features
 from utils.add_nar import add_nar_from_array
+from cleaner import simiFeat
 
 feature_learners = {
     "traditional" : Engineered_Features,
@@ -44,6 +46,7 @@ def exp_2(
         'set' : [],
         'features' : [],
         'noise percent' : [],
+        '# instances' : [],
         'number mislabeled' : [],
         '# IDed as mislabeled' : [],
         'precision' : [],
@@ -110,4 +113,20 @@ def exp_2(
                 f_test = np.load(f'temp/{set}_{extractor}_features_test_{noise_level}_noise.npy', allow_pickle=True)
             else:
                 f_test = f_learner.get_features(X_test)
+
+            y_clean = simiFeat(10, 3, f_test, y_test_noisy, "rank")
+
+
+            results['set'].append(set)
+            results['features'].append(extractor)
+            results['noise percent'].append(noise_dic[noise_level]['percent'])
+            results['# instances'].append(y_test.shape[0])
+            results['number mislabeled'].append(np.count_nonzero(y_test != y_test_noisy))
+            results['# IDed as mislabeled'].append(np.count_nonzero(y_test != y_test_noisy))
+            results['precision'].append(precision_score(y_test, y_clean, average='micro'))
+            results['recall'].append(recall_score(y_test, y_clean, average='micro'))
+            results['f1'].append(f1_score(y_test, y_clean, average='micro'))
+
+
+
         
