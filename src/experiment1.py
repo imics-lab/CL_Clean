@@ -30,6 +30,7 @@ from sklearn.metrics import accuracy_score
 
 K = 5
 WRITE_FEATURES = False
+WRITE_LABELS = True
 
 feature_learners = {
     #"traditional" : Engineered_Features,
@@ -79,6 +80,21 @@ def exp_1(
     y_train_low, _, y_train_high, _ = add_nar_from_array(y_train, num_classes)
     y_val_low, _, y_val_high, _ = add_nar_from_array(y_val, num_classes)
     y_test_low, _, y_test_high, _ = add_nar_from_array(y_test, num_classes)
+
+    if WRITE_LABELS:
+        with open(f'temp/{set}_train_labels_low_noise.npy', 'w+') as f:
+            np.save(f, y_train_low)
+        with open(f'temp/{set}_train_labels_high_noise.npy', 'w+') as f:
+            np.save(f, y_train_high)
+        with open(f'temp/{set}_val_labels_low_noise.npy', 'w+') as f:
+            np.save(f, y_val_low)
+        with open(f'temp/{set}_val_labels_high_noise.npy', 'w+') as f:
+            np.save(f, y_val_high)
+        with open(f'temp/{set}_test_labels_low_noise.npy', 'w+') as f:
+            np.save(f, y_test_low)
+        with open(f'temp/{set}_test_labels_high_noise.npy', 'w+') as f:
+            np.save(f, y_test_high)
+
 
     noise_dic = {
         'none' : {
