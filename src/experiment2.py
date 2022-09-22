@@ -114,7 +114,7 @@ def exp_2(
             else:
                 f_test = f_learner.get_features(X_test)
 
-            y_clean = simiFeat(10, 3, f_test, y_test_noisy, "rank")
+            y_test_cleaned = simiFeat(10, 3, f_test, y_test_noisy, "rank")
 
 
             results['set'].append(set)
@@ -122,10 +122,10 @@ def exp_2(
             results['noise percent'].append(noise_dic[noise_level]['percent'])
             results['# instances'].append(y_test.shape[0])
             results['number mislabeled'].append(np.count_nonzero(y_test != y_test_noisy))
-            results['# IDed as mislabeled'].append(np.count_nonzero(y_test != y_test_noisy))
-            results['precision'].append(precision_score(y_test, y_clean, average='micro'))
-            results['recall'].append(recall_score(y_test, y_clean, average='micro'))
-            results['f1'].append(f1_score(y_test, y_clean, average='micro'))
+            results['# IDed as mislabeled'].append(np.count_nonzero(y_test_cleaned != y_test_noisy))
+            results['precision'].append(precision_score(y_test, y_test_cleaned, average='micro'))
+            results['recall'].append(recall_score(y_test, y_test_cleaned, average='micro'))
+            results['f1'].append(f1_score(y_test, y_test_cleaned, average='micro'))
 
 
 

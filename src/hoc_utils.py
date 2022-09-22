@@ -4,9 +4,9 @@
 import numpy as np
 import torch.nn.functional as F
 import time
-import resnet_image as res_image
-import resnet as res_cifar
-import resnet_cifar as res_cifar_new
+#import resnet_image as res_image
+#import resnet as res_cifar
+#import resnet_cifar as res_cifar_new
 import torch
 import random
 import math
@@ -14,7 +14,7 @@ import torch.nn as nn
 import torchvision
 import os
 import shutil
-import global_var
+#import global_var
 import torch
 import yaml
 from numpy.testing import assert_array_almost_equal
@@ -361,27 +361,27 @@ def set_device():
     print(f'Current device is {_device}', flush=True)
     return _device
 
-def set_model_pre(config):
-    # use resnet50 for ImageNet pretrain (PyTorch official pre-trained model)
-    if config.pre_type == 'image':
-        model = res_image.resnet50(pretrained=True)
-    else:
-        RuntimeError('Undefined pretrained model.')
-    for param in model.parameters():
-        param.requires_grad = False
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, config.num_classes)
-    model.to(config.device)
-    return model
+# def set_model_pre(config):
+#     # use resnet50 for ImageNet pretrain (PyTorch official pre-trained model)
+#     if config.pre_type == 'image':
+#         model = res_image.resnet50(pretrained=True)
+#     else:
+#         RuntimeError('Undefined pretrained model.')
+#     for param in model.parameters():
+#         param.requires_grad = False
+#     num_ftrs = model.fc.in_features
+#     model.fc = nn.Linear(num_ftrs, config.num_classes)
+#     model.to(config.device)
+#     return model
 
 
 
 
-def set_model_train(config):
-    model = res_cifar_new.ResNet34(num_classes = config.num_classes)
-    model.to(config.device)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0005)
-    return model, optimizer
+# def set_model_train(config):
+#     model = res_cifar_new.ResNet34(num_classes = config.num_classes)
+#     model.to(config.device)
+#     optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0005)
+#     return model, optimizer
 
 
 

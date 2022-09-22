@@ -10,7 +10,6 @@
 
 import numpy as np
 import torch
-from src.model_wrappers import BATCH_SIZE
 from utils import augmentation
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cosine
@@ -269,10 +268,10 @@ def simiFeat(
 
     sel_noisy_rec = []
 
-    sel_clean_rec = np.zeros((config.num_epoch, fet.shape[0]))
+    sel_clean_rec = np.zeros((num_epochs, fet.shape[0]))
     sel_times_rec = np.zeros(fet.shape[0])
 
-    config.num_classes = np.unique(y)
+    config.num_classes = np.nanmax(y)+1
 
     record = [[] for _ in range(config.num_classes)]
 
