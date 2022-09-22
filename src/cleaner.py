@@ -23,7 +23,12 @@ BATCH_SIZE = 32
 
 class CONFIG():
     def __init__(self) -> None:
-        pass
+        self.method = 'rank1'
+        self.k = 5
+        self.max_iter = 150
+        self.G = 10
+        self.seed = 1899
+        self.num_classes = 0
 
 config = CONFIG()
 
@@ -168,6 +173,33 @@ def get_knn_acc_all_class(args, data_set, k=10, noise_prior=None, sel_noisy=None
     return sel_noisy
 
 #From: UCSC-Real
+def data_transform(record, noise_or_not, sel_noisy):
+    # assert noise_or_not is not None
+    total_len = sum([len(a) for a in record])
+    origin_trans = torch.zeros(total_len, record[0][0]['feature'].shape[0])
+    origin_label = torch.zeros(total_len).long()
+    noise_or_not_reorder = np.empty(total_len, dtype=bool)
+    index_rec = np.zeros(total_len, dtype=int)
+    cnt, lb = 0, 0
+    sel_noisy = np.array(sel_noisy)
+    noisy_prior = np.zeros(len(record))
+
+    for item in record:
+        for i in item:
+            # if i['index'] not in sel_noisy:
+            origin_trans[cnt] = i['feature']
+            origin_label[cnt] = lb
+            noise_or_not_reorder[cnt] = noise_or_not[i['index']] if noise_or_not is not None else False
+            index_rec[cnt] = i['index']
+            cnt += 1 - np.sum(sel_noisy == i['index'].item())
+            # print(cnt)
+        noisy_prior[lb] = cnt - np.sum(noisy_prior)
+        lb += 1
+    data_set = {'feature': origin_trans[:cnt], 'noisy_label': origin_label[:cnt],
+                'noise_or_not': noise_or_not_reorder[:cnt], 'index': index_rec[:cnt]}
+    return data_set, noisy_prior / cnt
+
+#From: UCSC-Real
 def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
 
     T_given_noisy_true = None
@@ -232,12 +264,39 @@ def simiFeat(
         y = np.argmax(y, axis=-1)
     y_clean = y.copy()
     num_classes = np.max(y)+1
+
+    train_dataloader = setup_dataloader(fet, y)
+
+    sel_noisy_rec = []
+
+    sel_clean_rec = np.zeros((config.num_epoch, fet.shape[0]))
+    sel_times_rec = np.zeros(fet.shape[0])
+
+    config.num_classes = np.unique(y)
+
+    record = [[] for _ in range(config.num_classes)]
+
     for n in range(num_epochs):
-        y_prime = KNNLabel(fet, y_clean, num_classes, k)
-        if method == "vote":
-            y_clean = np.argmax(y_prime, axis=-1)
-        else:
-            pass
+        sel_noisy, sel_clean, sel_idx = noniterate_detection(config, record, train_dataset,
+                                                                     sel_noisy=sel_noisy_rec.copy())
+        if config.num_epoch > 1:
+            sel_clean_rec[n][np.array(sel_clean)] = 1
+            sel_times_rec[np.array(sel_idx)] += 1
+
+        if n % 1 == 0:
+            # config.method = 'mv'
+            aa = np.sum(sel_clean_rec[:n + 1], 0) / sel_times_rec
+            nan_flag = np.isnan(aa)
+            aa[nan_flag] = 0
+            # aa += 0.1
+
+            sel_clean_summary = np.round(aa).astype(bool)
+            sel_noisy_summary = np.round(1.0 - aa).astype(bool)
+            sel_noisy_summary[nan_flag] = False
+            print(
+                f'Found {sel_clean_summary.shape[0] - np.sum(sel_clean_summary) - np.sum(nan_flag * 1)} corrupted instances from {sel_clean_summary.shape[0] - np.sum(nan_flag * 1)} instances')
+            
+            
     
 
 
