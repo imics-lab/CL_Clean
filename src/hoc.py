@@ -494,3 +494,38 @@ def get_score(knn_labels_cnt, label, k, method='cores', prior=None):  # method =
         raise NameError('Undefined method')
 
     return score
+
+def get_T_global_min_new(args, data_set, max_step=501, T0=None, p0=None, lr=0.1, NumTest=50, all_point_cnt=15000):
+
+
+    # Build Feature Clusters --------------------------------------
+    KINDS = args.num_classes
+    # NumTest = 50
+    all_point_cnt = args.cnt
+    print(f'Use {all_point_cnt} in each round. Total rounds {NumTest}.')
+
+    p_estimate = [[] for _ in range(3)]
+    p_estimate[0] = torch.zeros(KINDS)
+    p_estimate[1] = torch.zeros(KINDS, KINDS)
+    p_estimate[2] = torch.zeros(KINDS, KINDS, KINDS)
+    # p_estimate_rec = torch.zeros(NumTest, 3)
+    for idx in range(NumTest):
+        # print(idx, flush=True)
+        # global
+        sample = np.random.choice(range(data_set['feature'].shape[0]), all_point_cnt, replace=False)
+        # final_feat, noisy_label = get_feat_clusters(data_set, sample)
+        final_feat = data_set['feature'][sample]
+        noisy_label = data_set['noisy_label'][sample]
+        cnt_y_3 = count_y(KINDS, final_feat, noisy_label, all_point_cnt)
+        for i in range(3):
+            cnt_y_3[i] /= all_point_cnt
+            p_estimate[i] = p_estimate[i] + cnt_y_3[i] if idx != 0 else cnt_y_3[i]
+
+    for j in range(3):
+        p_estimate[j] = p_estimate[j] / NumTest
+
+    args.device = set_device()
+    loss_min, E_calc, P_calc, _ = calc_func(KINDS, p_estimate, False, args.device, max_step, T0, p0, lr=lr)
+    E_calc = E_calc.cpu().numpy()
+    P_calc = P_calc.cpu().numpy()
+    return E_calc, P_calc
