@@ -30,6 +30,10 @@ def compute_apparent_clusterability_torch(
     fet : torch.Tensor,
     y   : torch.Tensor
 ):
+    """
+    Compute that percentage of instances in the feature space that
+    share an assigned label with their 2 nearest neighbors
+    """
     mat = similarity_matrix(fet)
     _, idx_1 = torch.kthvalue(mat, 2, dim=1)
     _, idx_2 = torch.kthvalue(mat, 3, dim=1)
@@ -135,8 +139,12 @@ if __name__ == '__main__':
     ])
 
     y = np.array([0, 0, 0, 1, 1])
-    X = torch.Tensor(X)
-    y = torch.Tensor(y)
-    compute_apparent_clusterability_torch(X, y)
+    X_torch = torch.Tensor(X)
+    y_torch = torch.Tensor(y)
+    clstr = compute_apparent_clusterability(X, y)
+    clstr_torch = compute_apparent_clusterability_torch(X_torch, y_torch)
     #y_clean = simiFeat(10, 2, X, y, "vote")
+    diff = abs(clstr - clstr_torch)
+    assert diff < 0.01, "diff should be less than 1%"
+    print("Difference of two approaches: ", diff)
 
