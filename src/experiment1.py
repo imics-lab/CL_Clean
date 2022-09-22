@@ -29,7 +29,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
 K = 5
-WRITE_FEATURES = False
+WRITE_FEATURES = True
 WRITE_LABELS = True
 
 feature_learners = {
@@ -82,17 +82,17 @@ def exp_1(
     y_test_low, _, y_test_high, _ = add_nar_from_array(y_test, num_classes)
 
     if WRITE_LABELS:
-        with open(f'temp/{set}_train_labels_low_noise.npy', 'w+') as f:
+        with open(f'temp/{set}_train_labels_low_noise.npy', 'wb+') as f:
             np.save(f, y_train_low)
-        with open(f'temp/{set}_train_labels_high_noise.npy', 'w+') as f:
+        with open(f'temp/{set}_train_labels_high_noise.npy', 'wb+') as f:
             np.save(f, y_train_high)
-        with open(f'temp/{set}_val_labels_low_noise.npy', 'w+') as f:
+        with open(f'temp/{set}_val_labels_low_noise.npy', 'wb+') as f:
             np.save(f, y_val_low)
-        with open(f'temp/{set}_val_labels_high_noise.npy', 'w+') as f:
+        with open(f'temp/{set}_val_labels_high_noise.npy', 'wb+') as f:
             np.save(f, y_val_high)
-        with open(f'temp/{set}_test_labels_low_noise.npy', 'w+') as f:
+        with open(f'temp/{set}_test_labels_low_noise.npy', 'wb+') as f:
             np.save(f, y_test_low)
-        with open(f'temp/{set}_test_labels_high_noise.npy', 'w+') as f:
+        with open(f'temp/{set}_test_labels_high_noise.npy', 'wb+') as f:
             np.save(f, y_test_high)
 
 
@@ -121,40 +121,40 @@ def exp_1(
     for extractor in feature_learners.keys():
         for noise_level in noise_dic.keys():
 
-            y_train_noisey = noise_dic[noise_level]['y_train']
-            y_val_noisey = noise_dic[noise_level]['y_val']
-            y_test_noisey = noise_dic[noise_level]['y_test']
+            y_train_noisy = noise_dic[noise_level]['y_train']
+            y_val_noisy = noise_dic[noise_level]['y_val']
+            y_test_noisy = noise_dic[noise_level]['y_test']
 
             print(f"## Experiment 1: {noise_level} Noise + {extractor} with {set}")
             print("Shape of X_train in experiment 1: ", X_train.shape)
             
             #check storage for features and generate if necesary
-            if os.path.exists(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy'):
-                f_train = np.load(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', allow_pickle=True)
+            if os.path.exists(f'temp/exp1_{set}_{extractor}_features_train_{noise_level}_noise.npy'):
+                f_train = np.load(f'temp/exp1_{set}_{extractor}_features_train_{noise_level}_noise.npy', allow_pickle=True)
             else:
-                f_learner = feature_learners[extractor](X_train, y=y_train_noisey)
-                f_learner.fit(X_train, y_train_noisey, X_val, y_val_noisey)
+                f_learner = feature_learners[extractor](X_train, y=y_train_noisy)
+                f_learner.fit(X_train, y_train_noisy, X_val, y_val_noisy)
                 f_train = f_learner.get_features(X_train)
                 
                 if WRITE_FEATURES:
-                    f = open(f'temp/exp1_{set}_{extractor}_features_train_low_noise.npy', 'wb+') 
+                    f = open(f'temp/exp1_{set}_{extractor}_features_train_{noise_level}_noise.npy', 'wb+') 
                     np.save(f, f_train)
                     f.close()
 
-            if os.path.exists(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy'):
-                f_test = np.load(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', allow_pickle=True)
+            if os.path.exists(f'temp/exp1_{set}_{extractor}_features_test_{noise_level}_noise.npy'):
+                f_test = np.load(f'temp/exp1_{set}_{extractor}_features_test_{noise_level}_noise.npy', allow_pickle=True)
             else:
                 f_test = f_learner.get_features(X_test)
                 
                 if WRITE_FEATURES:
-                    f = open(f'temp/exp1_{set}_{extractor}_features_test_low_noise.npy', 'wb+') 
+                    f = open(f'temp/exp1_{set}_{extractor}_features_test_{noise_level}_noise.npy', 'wb+') 
                     np.save(f, f_test)
                     f.close()
 
             #generate a fresh KNN classifier and fit it to the feature set
             model = KNeighborsClassifier(n_neighbors=K, weights='distance', metric='cosine')
             #model = SVC()
-            model.fit(f_train, y_train_noisey)
+            model.fit(f_train, y_train_noisy)
 
             #predict a label for every instance
             y_pred = model.predict(f_test)
@@ -174,15 +174,15 @@ def exp_1(
             
             for i in range(len(y_pred)): 
                 #Mislabeled
-                if y_test_noisey[i] != y_test[i]:
+                if y_test_noisy[i] != y_test[i]:
                     count_inc += 1
-                    if y_pred[i] != y_test_noisey[i]:
+                    if y_pred[i] != y_test_noisy[i]:
                         count_mispredicted += 1
                         count_mispred_given_inc += 1
                 #Correct Label
                 else:
                     count_cor += 1
-                    if y_pred[i] != y_test_noisey[i]:
+                    if y_pred[i] != y_test_noisy[i]:
                         count_mispredicted += 1
                         count_mispred_given_cor += 1
                 
@@ -193,7 +193,7 @@ def exp_1(
             results['set'].append(set)
             results['features'].append(extractor)
             results['noise percent'].append(noise_dic[noise_level]['percent'])
-            results['accuracy'].append(accuracy_score(y_pred, y_test_noisey))
+            results['accuracy'].append(accuracy_score(y_pred, y_test_noisy))
             results['P(mispred)'].append(count_mispredicted / num_instances)
             results['P(mispred|correct)'].append(count_mispred_given_cor / count_cor)
             results['P(mispred|incorrect)'].append(count_mispred_given_inc / count_inc if count_inc != 0 else 0)
