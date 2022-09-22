@@ -87,7 +87,7 @@ class ArgHolder():
         self.embedding_width = EMBEDDING_WIDTH
         self.mmb_size = NN_MEM
 
-def setup_dataloader(X : np.ndarray, y : np.ndarray, args : ArgHolder):
+def setup_dataloader(X : np.ndarray, y : np.ndarray, args : ArgHolder, shuffle=False):
     torch_X = torch.Tensor(X)
     torch_y = torch.Tensor(y)
     torch_d = torch.zeros(torch_y.shape)
@@ -95,7 +95,7 @@ def setup_dataloader(X : np.ndarray, y : np.ndarray, args : ArgHolder):
 
     dataset = torch.utils.data.TensorDataset(torch_X, torch_y, torch_d)
     dataloader = DataLoader(
-        dataset=dataset, batch_size = args.batch_size, shuffle=False, 
+        dataset=dataset, batch_size = args.batch_size, shuffle=shuffle,
         drop_last=False, num_workers=NUM_WORKERS
     )
     return dataloader
@@ -144,8 +144,8 @@ class Conv_AE(nn.Module):
         """
         Train cycle with early stopping
         """
-        train_loader = setup_dataloader(X_train,  np.zeros(X_train.shape[0]), self.args)
-        val_loader = setup_dataloader(X_val,  np.zeros(X_val.shape[0]), self.args)
+        train_loader = setup_dataloader(X_train,  np.zeros(X_train.shape[0]), self.args, shuffle=True)
+        val_loader = setup_dataloader(X_val,  np.zeros(X_val.shape[0]), self.args, shuffle=True)
         es = EarlyStopping(tolerance=10, min_delta=0.001)
         for epoch in range(self.args.n_epoch):
             print(f'Epoch {epoch}:')
@@ -242,10 +242,10 @@ class SimCLR(nn.Module):
         Runs through max number of epochs and then reloads best snapshot
         """
         
-        train_dataloader = setup_dataloader(X_train, y_train, self.args)
+        train_dataloader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
 
         
-        val_dataloader = setup_dataloader(X_val, y_val, self.args)
+        val_dataloader = setup_dataloader(X_val, y_val, self.args, shuffle=True)
 
         best_model = trainer.train(
             train_loaders=[train_dataloader],
@@ -365,9 +365,9 @@ class NNCLR(nn.Module):
         Train cycle with validation
         Runs through max number of epochs and then reloads best snapshot
         """
-        train_dataloader = setup_dataloader(X_train, y_train, self.args)
+        train_dataloader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
 
-        val_dataloader = setup_dataloader(X_val, y_val, self.args)
+        val_dataloader = setup_dataloader(X_val, y_val, self.args, shuffle=True)
 
         best_model = trainer.train(
             train_loaders=[train_dataloader],
@@ -489,8 +489,8 @@ class Supervised_C(nn.Module):
         """
         Train cycle with early stopping
         """
-        train_loader = setup_dataloader(X_train, y_train, self.args)
-        val_loader = setup_dataloader(X_val, y_val, self.args)
+        train_loader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
+        val_loader = setup_dataloader(X_val, y_val, self.args, shuffle=True)
         es = EarlyStopping(tolerance=7, min_delta=0.01)
         for epoch in range(self.args.n_epoch):
             print(f'Epoch {epoch}:')

@@ -10,10 +10,16 @@
 
 import numpy as np
 import torch
+from src.model_wrappers import BATCH_SIZE
 from utils import augmentation
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cosine
 from hoc import get_T_global_min_new, get_score, count_knn_distribution
+from torch.utils.data import DataLoader
+
+NUM_CLEAN_EPOCHS = 10
+NUM_WORKERS = 16
+BATCH_SIZE = 32
 
 class CONFIG():
     def __init__(self) -> None:
@@ -44,6 +50,7 @@ def compute_apparent_clusterability_torch(
     share an assigned label with their 2 nearest neighbors
     """
     mat = similarity_matrix(fet)
+    #kth value counts from 1
     _, idx_1 = torch.kthvalue(mat, 2, dim=1)
     _, idx_2 = torch.kthvalue(mat, 3, dim=1)
     clusterable_count = 0
@@ -51,6 +58,19 @@ def compute_apparent_clusterability_torch(
         if y[i] == y[idx_1[i]] == y[idx_2[i]]:
             clusterable_count+=1
     return clusterable_count/fet.shape[0]
+
+def setup_dataloader(X : np.ndarray, y : np.ndarray):
+    torch_X = torch.Tensor(X)
+    torch_y = torch.Tensor(y)
+    torch_d = torch.zeros(torch_y.shape)
+
+
+    dataset = torch.utils.data.TensorDataset(torch_X, torch_y, torch_d)
+    dataloader = DataLoader(
+        dataset=dataset, batch_size = BATCH_SIZE, shuffle=False, 
+        drop_last=False, num_workers=NUM_WORKERS
+    )
+    return dataloader
 
 ################### Numpy Functions ######################
 
