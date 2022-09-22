@@ -1,3 +1,6 @@
+#Adapted from CL-HAR
+#Original work: https://github.com/Tian0426/CL-HAR
+
 import numpy as np
 from numpy.lib.stride_tricks import as_strided as ast
 # from dataclasses import dataclass

@@ -129,25 +129,25 @@ def exp_1(
             print("Shape of X_train in experiment 1: ", X_train.shape)
             
             #check storage for features and generate if necesary
-            if os.path.exists(f'temp/exp1_{set}_{extractor}_features_train_{noise_level}_noise.npy'):
-                f_train = np.load(f'temp/exp1_{set}_{extractor}_features_train_{noise_level}_noise.npy', allow_pickle=True)
+            if os.path.exists(f'temp/{set}_{extractor}_features_train_{noise_level}_noise.npy'):
+                f_train = np.load(f'temp/{set}_{extractor}_features_train_{noise_level}_noise.npy', allow_pickle=True)
             else:
                 f_learner = feature_learners[extractor](X_train, y=y_train_noisy)
                 f_learner.fit(X_train, y_train_noisy, X_val, y_val_noisy)
                 f_train = f_learner.get_features(X_train)
                 
                 if WRITE_FEATURES:
-                    f = open(f'temp/exp1_{set}_{extractor}_features_train_{noise_level}_noise.npy', 'wb+') 
+                    f = open(f'temp/{set}_{extractor}_features_train_{noise_level}_noise.npy', 'wb+') 
                     np.save(f, f_train)
                     f.close()
 
-            if os.path.exists(f'temp/exp1_{set}_{extractor}_features_test_{noise_level}_noise.npy'):
-                f_test = np.load(f'temp/exp1_{set}_{extractor}_features_test_{noise_level}_noise.npy', allow_pickle=True)
+            if os.path.exists(f'temp/{set}_{extractor}_features_test_{noise_level}_noise.npy'):
+                f_test = np.load(f'temp/{set}_{extractor}_features_test_{noise_level}_noise.npy', allow_pickle=True)
             else:
                 f_test = f_learner.get_features(X_test)
                 
                 if WRITE_FEATURES:
-                    f = open(f'temp/exp1_{set}_{extractor}_features_test_{noise_level}_noise.npy', 'wb+') 
+                    f = open(f'temp/{set}_{extractor}_features_test_{noise_level}_noise.npy', 'wb+') 
                     np.save(f, f_test)
                     f.close()
 

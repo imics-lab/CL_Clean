@@ -1,3 +1,6 @@
+#Adapted from CL-HAR
+#Original work: https://github.com/Tian0426/CL-HAR
+
 import torch
 import numpy as np
 from torch.nn import Softmax

@@ -3,6 +3,9 @@ Data Pre-processing on SHAR dataset.
 
 '''
 
+#Adapted from CL-HAR
+#Original work: https://github.com/Tian0426/CL-HAR
+
 import os
 import numpy as np
 from torch.utils.data import Dataset, DataLoader

@@ -3,6 +3,9 @@ Data Pre-processing on HHAR dataset.
 
 '''
 
+#Adapted from CL-HAR
+#Original work: https://github.com/Tian0426/CL-HAR
+
 import numpy as np
 import pandas as pd
 import sys

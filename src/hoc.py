@@ -1,4 +1,5 @@
 #UCSC-REAL
+#Original work: https://github.com/UCSC-REAL/HOC
 
 import torch
 import torch.nn.functional as F
