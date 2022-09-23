@@ -206,6 +206,9 @@ def exp_3(
             results['accuracy on clean test'].append(accuracy_score(y_test, y_pred))
             results['accuracy on noisy test'].append(accuracy_score(y_test_noisy, y_pred))
 
+        #end for noise_level
+    #end for extractor
+#end exp3
 
 
 
