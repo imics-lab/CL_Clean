@@ -31,6 +31,8 @@ class CONFIG():
 
 config = CONFIG()
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 ################### PyTorch Functions ######################
 
 # (x - y)^2 = x^2 - 2*x*y + y^2
@@ -276,8 +278,19 @@ def simiFeat(
     record = [[] for _ in range(config.num_classes)]
 
     for n in range(num_epochs):
+        print("Cleaning Epoch: ", n)
+
+        for i_batch, (feature, label, index) in enumerate(train_dataloader):
+                feature = feature.to(device)
+                label = label.to(device)
+                for i in range(feature.shape[0]):
+                    record[label[i]].append({'feature': feature[i].detach().cpu(), 'index': index[i]})
+                if i_batch > 200:
+                    break
+
         sel_noisy, sel_clean, sel_idx = noniterate_detection(config, record, train_dataset,
                                                                      sel_noisy=sel_noisy_rec.copy())
+
         if config.num_epoch > 1:
             sel_clean_rec[n][np.array(sel_clean)] = 1
             sel_times_rec[np.array(sel_idx)] += 1
@@ -315,8 +328,12 @@ if __name__ == '__main__':
     y_torch = torch.Tensor(y)
     clstr = compute_apparent_clusterability(X, y)
     clstr_torch = compute_apparent_clusterability_torch(X_torch, y_torch)
-    #y_clean = simiFeat(10, 2, X, y, "vote")
+    
     diff = abs(clstr - clstr_torch)
     assert diff < 0.01, "diff should be less than 1%"
     print("Difference of two approaches: ", diff)
+
+    y_clean = simiFeat(10, 2, X, y, "vote")
+    print("y: ", y)
+    print("Y_clean: ", y_clean)
 
