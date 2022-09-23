@@ -38,7 +38,7 @@ SLIDING_WINDIW = 128
 LR = 0.001
 WEIGHT_DECAY = 1e-5
 NN_MEM = 1024 #size in megabytes
-CL_EPOCHS = 120
+CL_EPOCHS = 3 #120
 NUM_WORKERS = 16
 BATCH_SIZE = 128
 
@@ -283,10 +283,15 @@ class SimCLR_C(SimCLR):
                     fet = f
                 else:
                     fet = torch.cat((fet, f))
+
+        if fet.ndim == 3:
+            fet = nn.functional.max_pool1d(fet, kernel_size=fet.shape[2])
+            fet = torch.reshape(fet, (fet.shape[0], fet.shape[1]))
+        
         if device == 'cuda':
-            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
+            return fet.detach().cpu().numpy()
         else:
-            return np.nanmax(fet.detach().numpy(), axis=2)
+            return fet.detach().numpy()
         
 
 class SimCLR_T(SimCLR):
@@ -304,6 +309,11 @@ class SimCLR_T(SimCLR):
                     fet = f
                 else:
                     fet = torch.cat((fet, f))
+        
+        if fet.ndim == 3:
+            fet = nn.functional.max_pool1d(fet, kernel_size=fet.shape[2])
+            fet = torch.reshape(fet, (fet.shape[0], fet.shape[1]))
+        
         if device == 'cuda':
             return fet.detach().cpu().numpy()
         else:
@@ -326,6 +336,11 @@ class SimCLR_R(SimCLR):
                     fet = f
                 else:
                     fet = torch.cat((fet, f))
+        
+        if fet.ndim == 3:
+            fet = nn.functional.max_pool1d(fet, kernel_size=fet.shape[2])
+            fet = torch.reshape(fet, (fet.shape[0], fet.shape[1]))
+        
         if device == 'cuda':
             return fet.detach().cpu().numpy()
         else:
@@ -404,10 +419,15 @@ class NNCLR_C(NNCLR):
                     fet = f
                 else:
                     fet = torch.cat((fet, f))
+        
+        if fet.ndim == 3:
+            fet = nn.functional.max_pool1d(fet, kernel_size=fet.shape[2])
+            fet = torch.reshape(fet, (fet.shape[0], fet.shape[1]))
+        
         if device == 'cuda':
-            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
+            return fet.detach().cpu().numpy()
         else:
-            return np.nanmax(fet.detach().numpy(), axis=2)
+            return fet.detach().numpy()
 
 class NNCLR_T(NNCLR):
     def __init__(self, X, y=None) -> None:
@@ -424,6 +444,11 @@ class NNCLR_T(NNCLR):
                     fet = f
                 else:
                     fet = torch.cat((fet, f))
+        
+        if fet.ndim == 3:
+            fet = nn.functional.max_pool1d(fet, kernel_size=fet.shape[2])
+            fet = torch.reshape(fet, (fet.shape[0], fet.shape[1]))
+        
         if device == 'cuda':
             return fet.detach().cpu().numpy()
         else:
@@ -444,10 +469,15 @@ class NNCLR_R(NNCLR):
                     fet = f
                 else:
                     fet = torch.cat((fet, f))
+        
+        if fet.ndim == 3:
+            fet = nn.functional.max_pool1d(fet, kernel_size=fet.shape[2])
+            fet = torch.reshape(fet, (fet.shape[0], fet.shape[1]))
+        
         if device == 'cuda':
-            return np.nanmax(fet.detach().cpu().numpy(), axis=2)
+            return fet.detach().cpu().numpy()
         else:
-            return np.nanmax(fet.detach().numpy(), axis=2)
+            return fet.detach().numpy()
 
 class Supervised_C(nn.Module):
     def __init__(self, X, y=None) -> None:

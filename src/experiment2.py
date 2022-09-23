@@ -62,13 +62,13 @@ def exp_2(
 
     #Check for noisey labels, make them if necesary
     if os.path.exists(f'temp/{set}_test_labels_high_noise.npy'):
-        y_train_high = np.load(f'temp/{set}_train_labels_high_noise.npy', dtype='int')
-        y_val_high = np.load(f'temp/{set}_val_labels_high_noise.npy', dtype='int')
-        y_test_high = np.load(f'temp/{set}_test_labels_high_noise.npy', dtype='int')
+        y_train_high = np.load(f'temp/{set}_train_labels_high_noise.npy')
+        y_val_high = np.load(f'temp/{set}_val_labels_high_noise.npy')
+        y_test_high = np.load(f'temp/{set}_test_labels_high_noise.npy')
 
-        y_train_low = np.load(f'temp/{set}_train_labels_low_noise.npy', dtype='int')
-        y_val_low = np.load(f'temp/{set}_val_labels_low_noise.npy', dtype='int')
-        y_test_low = np.load(f'temp/{set}_test_labels_low_noise.npy', dtype='int')
+        y_train_low = np.load(f'temp/{set}_train_labels_low_noise.npy')
+        y_val_low = np.load(f'temp/{set}_val_labels_low_noise.npy')
+        y_test_low = np.load(f'temp/{set}_test_labels_low_noise.npy')
     else:
         num_classes = np.max(y_train)+1
         y_train_low, _, y_train_high, _ = add_nar_from_array(y_train, num_classes)

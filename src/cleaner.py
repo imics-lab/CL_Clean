@@ -284,9 +284,9 @@ def simiFeat(
                 feature = feature.to(device)
                 label = label.to(device)
                 for i in range(feature.shape[0]):
-                    record[label[i]].append({'feature': feature[i].detach().cpu(), 'index': index[i]})
-                if i_batch > 200:
-                    break
+                    record[label[i]].append({'feature': feature[i].detach().cpu(), 'index': i_batch+1})
+                # if i_batch > 200:
+                #     break
 
         sel_noisy, sel_clean, sel_idx = noniterate_detection(config, record, train_dataset,
                                                                      sel_noisy=sel_noisy_rec.copy())
