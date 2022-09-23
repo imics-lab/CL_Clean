@@ -19,17 +19,17 @@ WRITE_LABELS = True
 import os
 import numpy as np
 from sklearn.metrics import precision_score, recall_score, f1_score
-from model_wrappers import Engineered_Features
+from model_wrappers import *
 from utils.add_nar import add_nar_from_array
 from cleaner import simiFeat
 
 feature_learners = {
-    "traditional" : Engineered_Features,
+    #"traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
     #"SimCLR + CNN" : SimCLR_C,
     #"SimCLR + T" : SimCLR_T,
     #"SimCLR + LSTM" : SimCLR_R,
-    #"NNCLR + CNN" : NNCLR_C,
+    "NNCLR + CNN" : NNCLR_C,
     #"NNCLR + T" : NNCLR_T,
     #"NNCLR + LSTM" : NNCLR_R,
     #"Supervised Convolutional" : Supervised_C

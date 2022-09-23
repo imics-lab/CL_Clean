@@ -28,6 +28,7 @@ class CONFIG():
         self.G = 10
         self.seed = 1899
         self.num_classes = 0
+        self.cnt = 0
 
 config = CONFIG()
 
@@ -192,7 +193,7 @@ def data_transform(record, noise_or_not, sel_noisy):
             origin_label[cnt] = lb
             noise_or_not_reorder[cnt] = noise_or_not[i['index']] if noise_or_not is not None else False
             index_rec[cnt] = i['index']
-            cnt += 1 - np.sum(sel_noisy == i['index'].item())
+            cnt += 1 - np.sum(sel_noisy == i['index'])
             # print(cnt)
         noisy_prior[lb] = cnt - np.sum(noisy_prior)
         lb += 1
@@ -265,6 +266,7 @@ def simiFeat(
         y = np.argmax(y, axis=-1)
     y_clean = y.copy()
     config.num_classes = np.nanmax(y)+1
+    config.cnt = fet.shape[0]
 
     train_dataloader = setup_dataloader(fet, y)
     train_dataset = train_dataloader
@@ -282,7 +284,7 @@ def simiFeat(
 
         for i_batch, (feature, label, index) in enumerate(train_dataloader):
                 feature = feature.to(device)
-                label = label.to(device)
+                label = label.to(device, dtype=torch.long)
                 for i in range(feature.shape[0]):
                     record[label[i]].append({'feature': feature[i].detach().cpu(), 'index': i_batch+1})
                 # if i_batch > 200:
