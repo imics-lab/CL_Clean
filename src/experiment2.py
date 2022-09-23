@@ -14,6 +14,8 @@
 #   Null: there will be no trend between clusterability of feature space and precision of label cleaning
 #   Alternate: more clusterable feature spaces will make more precise cleaning
 
+WRITE_LABELS = True
+
 import os
 import numpy as np
 from sklearn.metrics import precision_score, recall_score, f1_score
@@ -49,6 +51,7 @@ def exp_2(
         '# instances' : [],
         'number mislabeled' : [],
         '# IDed as mislabeled' : [],
+        '# correct after clean' : [],
         'precision' : [],
         'recall' : [],
         'f1' : []
@@ -114,8 +117,14 @@ def exp_2(
             else:
                 f_test = f_learner.get_features(X_test)
 
+            y_train_cleaned = simiFeat(10, 3, f_train, y_train_noisy, "rank")
             y_test_cleaned = simiFeat(10, 3, f_test, y_test_noisy, "rank")
 
+            if WRITE_LABELS:
+                with open(f'temp/{set}_{extractor}_train_labels_{noise_level}_noise_cleaned.npy', 'wb+') as f:
+                    np.save(f, y_train_cleaned)
+                with open(f'temp/{set}_{extractor}_test_labels_{noise_level}_noise_cleaned.npy', 'wb+') as f:
+                    np.save(f, y_test_cleaned)
 
             results['set'].append(set)
             results['features'].append(extractor)
@@ -123,9 +132,12 @@ def exp_2(
             results['# instances'].append(y_test.shape[0])
             results['number mislabeled'].append(np.count_nonzero(y_test != y_test_noisy))
             results['# IDed as mislabeled'].append(np.count_nonzero(y_test_cleaned != y_test_noisy))
+            results['# correct after clean'].append(np.count_nonzero(y_test_cleaned == y_test))
             results['precision'].append(precision_score(y_test, y_test_cleaned, average='micro'))
             results['recall'].append(recall_score(y_test, y_test_cleaned, average='micro'))
             results['f1'].append(f1_score(y_test, y_test_cleaned, average='micro'))
+
+
 
 
 

@@ -44,7 +44,7 @@ BATCH_SIZE = 128
 
 LOG = _logger('temp/train_log.txt')
 
-device = "cpu" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
             

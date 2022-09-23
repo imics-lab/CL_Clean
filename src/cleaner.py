@@ -207,7 +207,7 @@ def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
 
     # non-iterate
     # sel_noisy = []
-    data_set, noisy_prior = data_transform(record, train_dataset.noise_or_not, sel_noisy)
+    data_set, noisy_prior = data_transform(record, None, sel_noisy)
     # print(data_set['noisy_label'])
     if config.method == 'rank1':
         # T_init = global_var.get_value('T_init')
@@ -262,16 +262,16 @@ def simiFeat(
     if y.ndim > 1:
         y = np.argmax(y, axis=-1)
     y_clean = y.copy()
-    num_classes = np.max(y)+1
+    config.num_classes = np.nanmax(y)+1
 
     train_dataloader = setup_dataloader(fet, y)
+    train_dataset = train_dataloader
+    num_training_samples = fet.shape[0]
 
     sel_noisy_rec = []
 
     sel_clean_rec = np.zeros((num_epochs, fet.shape[0]))
     sel_times_rec = np.zeros(fet.shape[0])
-
-    config.num_classes = np.nanmax(y)+1
 
     record = [[] for _ in range(config.num_classes)]
 
