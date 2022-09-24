@@ -29,10 +29,14 @@ class CONFIG():
         self.seed = 1899
         self.num_classes = 0
         self.cnt = 0
+        self.min_similarity = 0.0
+        self.Tii_offset = 1.0
 
 config = CONFIG()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
+global_dic = {}
 
 ################### PyTorch Functions ######################
 
@@ -203,7 +207,8 @@ def data_transform(record, noise_or_not, sel_noisy):
 
 #From: UCSC-Real
 def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
-
+    global global_dic
+   
     T_given_noisy_true = None
     T_given_noisy = None
 
@@ -215,12 +220,18 @@ def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
     if config.method == 'rank1':
         # T_init = global_var.get_value('T_init')
         # p_init = global_var.get_value('p_init')
-        T_init = None
-        p_init = None
+        if 'T_init' in global_dic.keys():
+            T_init = global_dic['T_init']
+        else:
+            T_init = None
+        if 'p_init' in global_dic.keys():
+            p_init = global_dic['p_init']
+        else:
+            p_init = None
 
         # print(f'T_init is {T_init}')
         T, p = get_T_global_min_new(config, data_set=data_set, max_step=config.max_iter if T_init is None else 20,
-                                    lr=0.1 if T_init is None else 0.01, NumTest=config.G, T0=T_init, p0=p_init)
+                                    lr=0.1 if T_init is None else 0.01, NumTest=config.G, T0=T_init, p0=p_init, global_dic=global_dic)
 
 
         T_given_noisy = T * p / noisy_prior
@@ -237,9 +248,9 @@ def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
     sel_noisy = np.array(sel_noisy)
     sel_clean = np.array(list(set(data_set['index'].tolist()) ^ set(sel_noisy)))
 
-    noisy_in_sel_noisy = np.sum(train_dataset.noise_or_not[sel_noisy]) / sel_noisy.shape[0]
+    noisy_in_sel_noisy = np.sum(train_dataset['noise_or_not'][sel_noisy]) / sel_noisy.shape[0]
     precision_noisy = noisy_in_sel_noisy
-    recall_noisy = np.sum(train_dataset.noise_or_not[sel_noisy]) / np.sum(train_dataset.noise_or_not)
+    recall_noisy = np.sum(train_dataset['noise_or_not'][sel_noisy]) / np.sum(train_dataset['noise_or_not'])
 
 
     # print(f'[noisy] precision: {precision_noisy}')
@@ -262,6 +273,8 @@ def simiFeat(
     with fuzzy labeling
     """
     assert method in ["vote", "rank"], "Method must be vote or rank"
+    
+    global global_dic
     if y.ndim > 1:
         y = np.argmax(y, axis=-1)
     y_clean = y.copy()
@@ -269,7 +282,13 @@ def simiFeat(
     config.cnt = fet.shape[0]
 
     train_dataloader = setup_dataloader(fet, y)
-    train_dataset = train_dataloader
+    
+    train_dataset = {
+        'feature' : fet[:config.cnt],
+        'noisy_label' : y[:config.cnt],
+        'noise_or_not' : np.empty(y.shape[0], dtype=bool),
+        'index' : np.zeros(y.shape[0], dtype=int)
+    }
     num_training_samples = fet.shape[0]
 
     sel_noisy_rec = []
@@ -293,7 +312,7 @@ def simiFeat(
         sel_noisy, sel_clean, sel_idx = noniterate_detection(config, record, train_dataset,
                                                                      sel_noisy=sel_noisy_rec.copy())
 
-        if config.num_epoch > 1:
+        if num_epochs > 1:
             sel_clean_rec[n][np.array(sel_clean)] = 1
             sel_times_rec[np.array(sel_idx)] += 1
 

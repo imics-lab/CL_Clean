@@ -209,7 +209,8 @@ def func(KINDS, p_estimate, T_out, P_out, N, step, LOCAL, _device):
     return loss
 
 
-def calc_func(KINDS, p_estimate, LOCAL, _device, max_step=501, T0=None, p0=None, lr=0.1):
+# def calc_func(KINDS, p_estimate, LOCAL, _device, max_step=501, T0=None, p0=None, lr=0.1):
+def calc_func(KINDS, p_estimate, LOCAL, _device, max_step=501, T0=None, p0=None, lr=0.1, global_dic=None):
     # init
     # _device =  torch.device("cpu")
     N = KINDS
@@ -257,11 +258,13 @@ def calc_func(KINDS, p_estimate, LOCAL, _device, max_step=501, T0=None, p0=None,
         #     print(f'P {np.round(smp(P.cpu().view(-1)).detach().numpy()*100,1)}', flush=True)
         #     time1 = time.time()
     # if global_var.get_value('T_init') is None:
-    global_var.set_value('T_init', T_rec.detach())
+    #global_var.set_value('T_init', T_rec.detach())
+    global_dic['T_init'] = T_rec.detach()
     # tmp = global_var.get_value('T_init')
     # print(f'set T_init to {tmp}')
     # if global_var.get_value('p_init') is None:
-    global_var.set_value('p_init', P_rec.detach())
+    #global_var.set_value('p_init', P_rec.detach())
+    global_dic['p_init'] = P_rec.detach()
     print(f'T_init and p_init are updated')
     return loss_min, smt(T_rec).detach(), smp(P_rec).detach(), T_rec.detach()
 
@@ -495,7 +498,7 @@ def get_score(knn_labels_cnt, label, k, method='cores', prior=None):  # method =
 
     return score
 
-def get_T_global_min_new(args, data_set, max_step=501, T0=None, p0=None, lr=0.1, NumTest=50, all_point_cnt=15000):
+def get_T_global_min_new(args, data_set, max_step=501, T0=None, p0=None, lr=0.1, NumTest=50, all_point_cnt=15000, global_dic=None):
 
 
     # Build Feature Clusters --------------------------------------
@@ -525,7 +528,7 @@ def get_T_global_min_new(args, data_set, max_step=501, T0=None, p0=None, lr=0.1,
         p_estimate[j] = p_estimate[j] / NumTest
 
     args.device = set_device()
-    loss_min, E_calc, P_calc, _ = calc_func(KINDS, p_estimate, False, args.device, max_step, T0, p0, lr=lr)
+    loss_min, E_calc, P_calc, _ = calc_func(KINDS, p_estimate, False, args.device, max_step, T0, p0, lr=lr, global_dic=global_dic)
     E_calc = E_calc.cpu().numpy()
     P_calc = P_calc.cpu().numpy()
     return E_calc, P_calc
