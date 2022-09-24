@@ -257,7 +257,7 @@ def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
     # print(f'[noisy] recall: {recall_noisy}')
     # print(f'[noisy] F1-score: {2.0 * precision_noisy * recall_noisy / (precision_noisy + recall_noisy)}')
 
-    return sel_noisy, sel_clean, data_set['index']
+    return sel_noisy, sel_clean, data_set['index'], T_given_noisy
 
 
 
@@ -309,7 +309,7 @@ def simiFeat(
                 # if i_batch > 200:
                 #     break
 
-        sel_noisy, sel_clean, sel_idx = noniterate_detection(config, record, train_dataset,
+        sel_noisy, sel_clean, sel_idx, T = noniterate_detection(config, record, train_dataset,
                                                                      sel_noisy=sel_noisy_rec.copy())
 
         if num_epochs > 1:
@@ -330,7 +330,7 @@ def simiFeat(
                 f'Found {sel_clean_summary.shape[0] - np.sum(sel_clean_summary) - np.sum(nan_flag * 1)} corrupted instances from {sel_clean_summary.shape[0] - np.sum(nan_flag * 1)} instances')
     
     #figure out how to clean y
-    return y           
+    return sel_clean_rec, T           
             
     
 
