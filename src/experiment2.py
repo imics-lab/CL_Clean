@@ -117,8 +117,9 @@ def exp_2(
             else:
                 f_test = f_learner.get_features(X_test)
 
-            y_train_cleaned, _ = simiFeat(10, 3, f_train, y_train_noisy, "rank")
-            y_test_cleaned, _ = simiFeat(10, 3, f_test, y_test_noisy, "rank")
+            y_train_cleaned, _ = simiFeat(1, 3, f_train, y_train_noisy, "rank")
+            y_test_cleaned, _ = simiFeat(1, 3, f_test, y_test_noisy, "rank")
+
 
             if WRITE_LABELS:
                 with open(f'temp/{set}_{extractor}_train_labels_{noise_level}_noise_cleaned.npy', 'wb+') as f:

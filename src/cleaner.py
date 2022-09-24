@@ -15,6 +15,7 @@ from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cosine
 from hoc import get_T_global_min_new, get_score, count_knn_distribution
 from torch.utils.data import DataLoader
+from scipy import stats
 
 NUM_CLEAN_EPOCHS = 10
 NUM_WORKERS = 16
@@ -280,6 +281,7 @@ def simiFeat(
     y_clean = y.copy()
     config.num_classes = np.nanmax(y)+1
     config.cnt = fet.shape[0]
+    config.k = k
 
     train_dataloader = setup_dataloader(fet, y)
     
@@ -330,7 +332,13 @@ def simiFeat(
                 f'Found {sel_clean_summary.shape[0] - np.sum(sel_clean_summary) - np.sum(nan_flag * 1)} corrupted instances from {sel_clean_summary.shape[0] - np.sum(nan_flag * 1)} instances')
     
     #figure out how to clean y
-    return sel_clean_rec, T           
+    #sel_clean is a n x D array where D is # of instances
+    #contains each epochs determination of a correctg label
+    sel_clean_rec = np.array(sel_clean_rec)
+    y_clean = np.zeros((len(y)))
+    for i in range(len(y)):
+        y_clean[i], _ = stats.mode(sel_clean_rec[: , i], axis=None, keepdims=False)
+    return y_clean, T           
             
     
 
