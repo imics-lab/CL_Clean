@@ -33,14 +33,14 @@ from har_util import _logger
 from early_stopping import EarlyStopping
 
 
-EMBEDDING_WIDTH = 64
+EMBEDDING_WIDTH = 96
 SLIDING_WINDIW = 128
-LR = 0.001
+LR = 0.003
 WEIGHT_DECAY = 1e-5
 NN_MEM = 1024 #size in megabytes
 CL_EPOCHS = 3 #120
 NUM_WORKERS = 16
-BATCH_SIZE = 128
+BATCH_SIZE = 100
 
 LOG = _logger('temp/train_log.txt')
 

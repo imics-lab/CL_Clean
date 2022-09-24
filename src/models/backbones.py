@@ -274,7 +274,7 @@ class Projector(nn.Module):
     def __init__(self, model, bb_dim, prev_dim, dim):
         super(Projector, self).__init__()
         if model == 'SimCLR':
-            self.projector = nn.Sequential(nn.Linear(bb_dim, prev_dim),
+            self.projector = nn.Sequential(nn.LazyLinear(prev_dim),
                                            nn.ReLU(inplace=True),
                                            nn.Linear(prev_dim, dim))
         elif model == 'byol':
@@ -284,7 +284,7 @@ class Projector(nn.Module):
                                            nn.Linear(prev_dim, dim, bias=False),
                                            nn.BatchNorm1d(dim, affine=False))
         elif model == 'NNCLR':
-            self.projector = nn.Sequential(nn.Linear(bb_dim, prev_dim, bias=False),
+            self.projector = nn.Sequential(nn.LazyLinear(prev_dim, bias=False),
                                            nn.BatchNorm1d(prev_dim),
                                            nn.ReLU(inplace=True),
                                            nn.Linear(prev_dim, prev_dim, bias=False),
