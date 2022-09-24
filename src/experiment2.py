@@ -24,15 +24,15 @@ from utils.add_nar import add_nar_from_array
 from cleaner import simiFeat
 
 feature_learners = {
-    #"traditional" : Engineered_Features,
+    "traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
-    #"SimCLR + CNN" : SimCLR_C,
-    #"SimCLR + T" : SimCLR_T,
-    #"SimCLR + LSTM" : SimCLR_R,
+    "SimCLR + CNN" : SimCLR_C,
+    "SimCLR + T" : SimCLR_T,
+    "SimCLR + LSTM" : SimCLR_R,
     "NNCLR + CNN" : NNCLR_C,
-    #"NNCLR + T" : NNCLR_T,
-    #"NNCLR + LSTM" : NNCLR_R,
-    #"Supervised Convolutional" : Supervised_C
+    "NNCLR + T" : NNCLR_T,
+    "NNCLR + LSTM" : NNCLR_R,
+    "Supervised Convolutional" : Supervised_C
 }
 
 def exp_2(
@@ -137,6 +137,8 @@ def exp_2(
             results['precision'].append(precision_score(y_test, y_test_cleaned, average='micro'))
             results['recall'].append(recall_score(y_test, y_test_cleaned, average='micro'))
             results['f1'].append(f1_score(y_test, y_test_cleaned, average='micro'))
+
+            return results
 
 
 

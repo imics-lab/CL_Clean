@@ -107,7 +107,7 @@ if __name__ == '__main__':
         ### Run and Write Experiments
         #run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}.csv".format(NOW))
         run_and_write(exp_2, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp2_results_{}.csv".format(NOW))
-        run_and_write(exp_3, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp3_results_{}.csv".format(NOW))
+        #run_and_write(exp_3, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp3_results_{}.csv".format(NOW))
 
 
         if CLEANUP:
