@@ -26,16 +26,16 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 feature_learners = {
     "traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
-    #"SimCLR + CNN" : SimCLR_C,
-    #"SimCLR + T" : SimCLR_T,
-    #"SimCLR + LSTM" : SimCLR_R,
-    #"NNCLR + CNN" : NNCLR_C,
-    #"NNCLR + T" : NNCLR_T,
-    #"NNCLR + LSTM" : NNCLR_R,
-    #"Supervised Convolutional" : Supervised_C
+    "SimCLR + CNN" : SimCLR_C,
+    "SimCLR + T" : SimCLR_T,
+    "SimCLR + LSTM" : SimCLR_R,
+    "NNCLR + CNN" : NNCLR_C,
+    "NNCLR + T" : NNCLR_T,
+    "NNCLR + LSTM" : NNCLR_R,
+    "Supervised Convolutional" : Supervised_C
 }
 
-NUM_EPOCHS = 100
+NUM_EPOCHS = 3
 BATCH_SIZE = 32
 NUM_WORKERS = 16
 
@@ -186,7 +186,7 @@ def exp_3(
                     break
                 print('Train loss: ', total_loss)
 
-            test_loader = setup_dataloader(f_train, y_train_noisy, False)
+            test_loader = setup_dataloader(f_test, y_test_noisy, False)
             #predict a label for every test instance
             y_pred = None
             with torch.no_grad():
@@ -197,6 +197,9 @@ def exp_3(
                         y_pred = p
                     else:
                         y_pred = torch.cat((y_pred, p))
+            
+            y_pred = y_pred.detach().cpu().numpy()
+            y_pred = np.argmax(y_pred, axis=-1)
 
 
             results['set'].append(set)
