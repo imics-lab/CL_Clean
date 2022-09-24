@@ -138,7 +138,7 @@ def exp_2(
             results['recall'].append(recall_score(y_test, y_test_cleaned, average='micro'))
             results['f1'].append(f1_score(y_test, y_test_cleaned, average='micro'))
 
-            return results
+    return results
 
 
 
