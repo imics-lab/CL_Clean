@@ -271,6 +271,10 @@ class Classifier(nn.Module):
 
 
 class Projector(nn.Module):
+    #I am updating simclr and nnclr to use lazy first layers to
+    #avoid some sizing issues. I am not use byol or ts-tcc now
+    #so I am not changing them because I am less familiar with those
+    #frameworks, but do be aware of this
     def __init__(self, model, bb_dim, prev_dim, dim):
         super(Projector, self).__init__()
         if model == 'SimCLR':

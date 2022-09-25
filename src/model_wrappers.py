@@ -508,7 +508,7 @@ class Supervised_C(nn.Module):
         self.optimizer = torch.optim.Adam(self.model.parameters())
         
         self.args = ArgHolder(
-            n_epoch=120,
+            n_epoch=CL_EPOCHS,
             batch_size=BATCH_SIZE,
             framework="",
             model_name="Supervised CNN", 

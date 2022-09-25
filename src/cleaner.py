@@ -315,7 +315,7 @@ def simiFeat(
                                                                      sel_noisy=sel_noisy_rec.copy())
 
         if num_epochs > 1:
-            sel_clean_rec[n][np.array(sel_clean)] = 1
+            sel_clean_rec[n][np.array(sel_clean, dtype=int)] = 1
             sel_times_rec[np.array(sel_idx)] += 1
 
         if n % 1 == 0:
