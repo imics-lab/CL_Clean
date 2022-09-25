@@ -266,7 +266,10 @@ def calc_func(KINDS, p_estimate, LOCAL, _device, max_step=501, T0=None, p0=None,
     #global_var.set_value('p_init', P_rec.detach())
     global_dic['p_init'] = P_rec.detach()
     print(f'T_init and p_init are updated')
-    return loss_min, smt(T_rec).detach(), smp(P_rec).detach(), T_rec.detach()
+    if global_dic == None:
+        return loss_min, smt(T_rec).detach(), smp(P_rec).detach(), T_rec.detach()
+    else:
+        return loss_min, smt(T_rec).detach(), smp(P_rec).detach(), T_rec.detach(), global_dic
 
 
 def count_y(KINDS, feat_cord, label, cluster_sum):
@@ -528,7 +531,10 @@ def get_T_global_min_new(args, data_set, max_step=501, T0=None, p0=None, lr=0.1,
         p_estimate[j] = p_estimate[j] / NumTest
 
     args.device = set_device()
-    loss_min, E_calc, P_calc, _ = calc_func(KINDS, p_estimate, False, args.device, max_step, T0, p0, lr=lr, global_dic=global_dic)
+    loss_min, E_calc, P_calc, _ , global_dic = calc_func(KINDS, p_estimate, False, args.device, max_step, T0, p0, lr=lr, global_dic=global_dic)
     E_calc = E_calc.cpu().numpy()
     P_calc = P_calc.cpu().numpy()
-    return E_calc, P_calc
+    if global_dic == None:
+        return E_calc, P_calc
+    else:
+        return E_calc, P_calc, global_dic
