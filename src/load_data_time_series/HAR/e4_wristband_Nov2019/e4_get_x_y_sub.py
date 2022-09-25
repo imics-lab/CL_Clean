@@ -49,6 +49,7 @@ import matplotlib.pyplot as plt # for plotting - pandas uses matplotlib
 from tabulate import tabulate # for verbose tables
 from time import gmtime, strftime, localtime #for displaying Linux UTC timestamps in hh:mm:ss
 from datetime import datetime
+import os
 
 #Helper functions especially useful in colab
 from requests import get
@@ -97,6 +98,7 @@ def unzip_e4_file(zip_ffname, working_dir):
         if (os.path.exists(zip_ffname)):
             shutil.unpack_archive(zip_ffname,working_dir,'zip')
         else:
+            os.system('pwd')
             print("Error: ", zip_ffname, " not found, exiting")
             return
 
@@ -234,10 +236,10 @@ def split_df_to_timeslice_nparrays(df, time_steps, step):
 """# Main Function to generate ndarrays"""
 
 def get_X_y_sub(
-    working_dir='/content/temp', # this directory will be created inside colab
+    working_dir='content/temp', # this directory will be created inside colab
     # you probably need to change this path to your google drive mount
     # zip_dir = '/content/drive/MyDrive/Colab Notebooks/imics_lab_repositories/load_data_time_series_dev/HAR/e4_wristband_Nov2019/zip_datafiles/sub1',
-    zip_dir = '/load_data_time_series_dev/HAR/e4_wristband_Nov2019/zip_datafiles/sub1',
+    zip_dir = 'src/load_data_time_series/HAR/e4_wristband_Nov2019/zip_datafiles/sub1',
 
     zip_flist = [],
     # note the longer walk x25540_ zip file has not been labeled, this is for experiment only

@@ -222,9 +222,11 @@ def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
         # T_init = global_var.get_value('T_init')
         # p_init = global_var.get_value('p_init')
         if 'T_init' in global_dic.keys():
+            print('T_init exists')
             T_init = global_dic['T_init']
         else:
             T_init = None
+
         if 'p_init' in global_dic.keys():
             p_init = global_dic['p_init']
         else:
@@ -278,7 +280,7 @@ def simiFeat(
     global global_dic
     if y.ndim > 1:
         y = np.argmax(y, axis=-1)
-    y_clean = y.copy()
+    #y_clean = y.copy()
     config.num_classes = np.nanmax(y)+1
     config.cnt = fet.shape[0]
     config.k = k
