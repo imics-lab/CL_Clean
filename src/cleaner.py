@@ -71,7 +71,7 @@ def compute_apparent_clusterability_torch(
             clusterable_count+=1
     return clusterable_count/fet.shape[0]
 
-def setup_dataloader(X : np.ndarray, y : np.ndarray):
+def setup_dataloader(X : np.ndarray, y : np.ndarray, shuffle=False):
     torch_X = torch.Tensor(X)
     torch_y = torch.Tensor(y)
     torch_d = torch.zeros(torch_y.shape)
@@ -79,7 +79,7 @@ def setup_dataloader(X : np.ndarray, y : np.ndarray):
 
     dataset = torch.utils.data.TensorDataset(torch_X, torch_y, torch_d)
     dataloader = DataLoader(
-        dataset=dataset, batch_size = BATCH_SIZE, shuffle=False, 
+        dataset=dataset, batch_size = BATCH_SIZE, shuffle=shuffle, 
         drop_last=False, num_workers=NUM_WORKERS
     )
     return dataloader
@@ -284,7 +284,7 @@ def simiFeat(
     config.cnt = fet.shape[0]
     config.k = k
 
-    train_dataloader = setup_dataloader(fet, y)
+    train_dataloader = setup_dataloader(fet, y, shuffle=True)
     
     train_dataset = {
         'feature' : fet[:config.cnt],
