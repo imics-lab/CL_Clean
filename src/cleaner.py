@@ -343,8 +343,9 @@ def simiFeat(
     #sel_clean_summary == True for clean labels, false otherwise
     for i, prediction in enumerate(sel_clean_summary):
         if prediction:
+            #What is the correct label???
             y_clean = sel_noisy[i]
-    
+    print("I have changed ", np.count_nonzero(prediction==False)) 
     return y_clean, T           
             
     
