@@ -336,9 +336,15 @@ def simiFeat(
     #sel_clean is a n x D array where D is # of instances
     #contains each epochs determination of a correctg label
     sel_clean_rec = np.array(sel_clean_rec)
-    y_clean = np.zeros((len(y)))
-    for i in range(len(y)):
-        y_clean[i], _ = stats.mode(sel_clean_rec[: , i], axis=None, keepdims=False)
+    y_clean = y.copy()
+    # for i in range(len(y)):
+    #     y_clean[i], _ = stats.mode(sel_clean_rec[: , i], axis=None, keepdims=False)
+    
+    #sel_clean_summary == True for clean labels, false otherwise
+    for i, prediction in enumerate(sel_clean_summary):
+        if prediction:
+            y_clean = sel_noisy[i]
+    
     return y_clean, T           
             
     
