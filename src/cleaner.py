@@ -74,10 +74,10 @@ def compute_apparent_clusterability_torch(
 def setup_dataloader(X : np.ndarray, y : np.ndarray, shuffle=False):
     torch_X = torch.Tensor(X)
     torch_y = torch.Tensor(y)
-    torch_d = torch.zeros(torch_y.shape)
+    torch_index = torch.arange(torch_y.shape[0])
 
 
-    dataset = torch.utils.data.TensorDataset(torch_X, torch_y, torch_d)
+    dataset = torch.utils.data.TensorDataset(torch_X, torch_y, torch_index)
     dataloader = DataLoader(
         dataset=dataset, batch_size = BATCH_SIZE, shuffle=shuffle, 
         drop_last=False, num_workers=NUM_WORKERS
@@ -186,7 +186,7 @@ def data_transform(record, noise_or_not, sel_noisy):
     origin_trans = torch.zeros(total_len, record[0][0]['feature'].shape[0])
     origin_label = torch.zeros(total_len).long()
     noise_or_not_reorder = np.empty(total_len, dtype=bool)
-    index_rec = np.arange(total_len, dtype=int)
+    index_rec = np.zeros(total_len, dtype=int)
     cnt, lb = 0, 0
     sel_noisy = np.array(sel_noisy)
     noisy_prior = np.zeros(len(record))
@@ -247,7 +247,7 @@ def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
     sel_noisy = get_knn_acc_all_class(config, data_set, k=config.k, noise_prior=noisy_prior, sel_noisy=sel_noisy,
                                       thre_noise_rate=T_given_noisy, thre_true=T_given_noisy_true)
 
-    sel_noisy = np.array(sel_noisy)
+    sel_noisy = np.array(sel_noisy, dtyp=int)
     sel_clean = np.array(list(set(data_set['index'].tolist()) ^ set(sel_noisy)))
 
     noisy_in_sel_noisy = np.sum(train_dataset['noise_or_not'][sel_noisy]) / sel_noisy.shape[0]
@@ -311,7 +311,7 @@ def simiFeat(
                 feature = feature.to(device)
                 label = label.to(device, dtype=torch.long)
                 for i in range(feature.shape[0]):
-                    record[label[i]].append({'feature': feature[i].detach().cpu(), 'index': i_batch+1})
+                    record[label[i]].append({'feature': feature[i].detach().cpu(), 'index': index[i]})
                 # if i_batch > 200:
                 #     break
 
