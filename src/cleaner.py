@@ -186,7 +186,7 @@ def data_transform(record, noise_or_not, sel_noisy):
     origin_trans = torch.zeros(total_len, record[0][0]['feature'].shape[0])
     origin_label = torch.zeros(total_len).long()
     noise_or_not_reorder = np.empty(total_len, dtype=bool)
-    index_rec = np.zeros(total_len, dtype=int)
+    index_rec = np.arange(total_len, dtype=int)
     cnt, lb = 0, 0
     sel_noisy = np.array(sel_noisy)
     noisy_prior = np.zeros(len(record))
@@ -283,6 +283,8 @@ def simiFeat(
     config.num_classes = np.nanmax(y)+1
     config.cnt = fet.shape[0]
     config.k = k
+    if method == 'vote' : config.method = 'mv'
+    else: config.method = 'rank1'
 
     train_dataloader = setup_dataloader(fet, y, shuffle=True)
     
@@ -291,6 +293,7 @@ def simiFeat(
         'noisy_label' : y[:config.cnt],
         'noise_or_not' : np.empty(y.shape[0], dtype=bool),
         'index' : np.arange(0, y.shape[0], 1, dtype=int)
+        #'index' : y
     }
     num_training_samples = fet.shape[0]
 
