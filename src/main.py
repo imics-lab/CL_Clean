@@ -93,7 +93,9 @@ def load_synthetic_dataset(incl_xyz_accel=True, incl_rms_accel=False, incl_val_g
 
     for i in range (NUM_TRAIN):
         label = np.random.randint(0, NUM_CLASSES)
-        train_labels.append(label)
+        # one_hot = np.zeros(NUM_CLASSES)
+        # one_hot[label] = 1
+        train_labels.append([0 if i!=label else 1 for i in range(NUM_CLASSES)])
         train_set[i, :] = generate_pattern_data_as_array(
             length=INSTANCE_LEN,
             avg_pattern_length=params['avg_pattern_length'][label],
@@ -106,7 +108,7 @@ def load_synthetic_dataset(incl_xyz_accel=True, incl_rms_accel=False, incl_val_g
 
     for i in range (NUM_VAL):
         label = np.random.randint(0, NUM_CLASSES)
-        val_labels.append(label)
+        val_labels.append([0 if i!=label else 1 for i in range(NUM_CLASSES)])
         val_set[i, :] = generate_pattern_data_as_array(
             length=INSTANCE_LEN,
             avg_pattern_length=params['avg_pattern_length'][label],
@@ -119,7 +121,7 @@ def load_synthetic_dataset(incl_xyz_accel=True, incl_rms_accel=False, incl_val_g
 
     for i in range (NUM_VAL):
         label = np.random.randint(0, NUM_CLASSES)
-        test_labels.append(label)
+        test_labels.append([0 if i!=label else 1 for i in range(NUM_CLASSES)])
         test_set[i, :] = generate_pattern_data_as_array(
             length=INSTANCE_LEN,
             avg_pattern_length=params['avg_pattern_length'][label],
@@ -130,9 +132,6 @@ def load_synthetic_dataset(incl_xyz_accel=True, incl_rms_accel=False, incl_val_g
         )
         test_label_count[label] += 1
 
-    print("Train labels: ", '\n'.join(train_label_count))
-    print("Validation labels: ", '\n'.join(val_label_count))
-    print("Test labels: ", '\n'.join(test_label_count))
 
     train_set = np.reshape(train_set, (train_set.shape[0], train_set.shape[1], 1))
     val_set = np.reshape(val_set, (val_set.shape[0], val_set.shape[1], 1))
@@ -141,6 +140,10 @@ def load_synthetic_dataset(incl_xyz_accel=True, incl_rms_accel=False, incl_val_g
     train_labels = np.array(train_labels)
     val_labels = np.array(val_labels)
     test_labels = np.array(test_labels)
+
+    print("Train labels: ", '\n'.join([str(i) for i in train_label_count]))
+    print("Validatoions labels: ", '\n'.join([str(i) for i in val_label_count]))
+    print("Test labels: ", '\n'.join([str(i) for i in test_label_count]))
 
     print("Train data shape: ", train_set.shape)
     print("Validation data shape: ", val_set.shape)

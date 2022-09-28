@@ -8,7 +8,7 @@ import pandas as pd
 import random
 import math
 import matplotlib.pyplot as plt
-from ts_feature_toolkit import get_features_for_set
+from utils.ts_feature_toolkit import get_features_for_set
 
 # cylinder bell funnel based on "Learning comprehensible descriptions of multivariate time series"
 def generate_bell(length, amplitude, default_variance):
