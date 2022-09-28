@@ -166,7 +166,7 @@ datasets = {
 
 if __name__ == '__main__':
     """
-    Run each experiment on each dataset, so... 12?
+    Run each experiment on each dataset, so... 15?
     """
     torch.manual_seed(1899)
     np.random.seed(1899)
