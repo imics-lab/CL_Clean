@@ -15,6 +15,7 @@ from utils.sh_loader import sh_loco_load_dataset
 from experiment1 import exp_1
 from experiment2 import exp_2
 from experiment3 import exp_3
+from utils.gen_ts_data import generate_pattern_data_as_array
 import numpy as np
 import pandas as pd
 import os
@@ -22,13 +23,7 @@ import torch
 
 CLEANUP = False
 
-#Dataset are returned in channels-last format
-datasets = {
-    #'unimib' :  unimib_load_dataset,
-    'twister' : e4_load_dataset,
-    #'uci har' : uci_har_load_dataset,
-    #'sussex huawei' : sh_loco_load_dataset
-}
+
 
 def channel_swap(X : np.ndarray) -> np.ndarray:
     """
@@ -61,6 +56,108 @@ def run_and_write(
         file_frame = pd.read_csv(filename)
         file_frame = pd.concat([file_frame, results])
         file_frame.to_csv(filename, index=False)
+
+def load_synthetic_dataset(incl_xyz_accel=True, incl_rms_accel=False, incl_val_group=True):
+    NUM_TRAIN = 1000
+    NUM_VAL = 100
+    NUM_TEST = 100
+    NUM_CLASSES = 2
+    INSTANCE_LEN = 150
+
+    params = {
+        'avg_pattern_length' : [],
+        'avg_amplitude' : [],
+        'default_variance' : [],
+        'variance_pattern_length' : [],
+        'variance_amplitude' : []
+    }
+
+    for _ in range(NUM_CLASSES):
+        params['avg_amplitude'].append(np.random.randint(0, 5))
+        params['avg_pattern_length'].append(np.random.randint(5, 15))
+        params['default_variance'].append(np.random.randint(1, 4))
+        params['variance_pattern_length'].append(np.random.randint(5, 20))
+        params['variance_amplitude'].append(np.random.randint(1, 5))
+
+    train_set = np.zeros((NUM_TRAIN, INSTANCE_LEN))
+    val_set = np.zeros((NUM_VAL, INSTANCE_LEN))
+    test_set = np.zeros((NUM_TEST, INSTANCE_LEN))
+
+    train_labels = []
+    val_labels = []
+    test_labels = []
+
+    train_label_count = [0]*NUM_CLASSES
+    val_label_count = [0]*NUM_CLASSES
+    test_label_count = [0]*NUM_CLASSES
+
+    for i in range (NUM_TRAIN):
+        label = np.random.randint(0, NUM_CLASSES)
+        train_labels.append(label)
+        train_set[i, :] = generate_pattern_data_as_array(
+            length=INSTANCE_LEN,
+            avg_pattern_length=params['avg_pattern_length'][label],
+            avg_amplitude=params['avg_amplitude'][label],
+            default_variance=params['default_variance'][label],
+            variance_pattern_length=params['variance_pattern_length'][label],
+            variance_amplitude=params['variance_amplitude'][label]
+        )
+        train_label_count[label] += 1
+
+    for i in range (NUM_VAL):
+        label = np.random.randint(0, NUM_CLASSES)
+        val_labels.append(label)
+        val_set[i, :] = generate_pattern_data_as_array(
+            length=INSTANCE_LEN,
+            avg_pattern_length=params['avg_pattern_length'][label],
+            avg_amplitude=params['avg_amplitude'][label],
+            default_variance=params['default_variance'][label],
+            variance_pattern_length=params['variance_pattern_length'][label],
+            variance_amplitude=params['variance_amplitude'][label]
+        )
+        val_label_count[label] += 1
+
+    for i in range (NUM_VAL):
+        label = np.random.randint(0, NUM_CLASSES)
+        test_labels.append(label)
+        test_set[i, :] = generate_pattern_data_as_array(
+            length=INSTANCE_LEN,
+            avg_pattern_length=params['avg_pattern_length'][label],
+            avg_amplitude=params['avg_amplitude'][label],
+            default_variance=params['default_variance'][label],
+            variance_pattern_length=params['variance_pattern_length'][label],
+            variance_amplitude=params['variance_amplitude'][label]
+        )
+        test_label_count[label] += 1
+
+    print("Train labels: ", '\n'.join(train_label_count))
+    print("Validation labels: ", '\n'.join(val_label_count))
+    print("Test labels: ", '\n'.join(test_label_count))
+
+    train_set = np.reshape(train_set, (train_set.shape[0], train_set.shape[1], 1))
+    val_set = np.reshape(val_set, (val_set.shape[0], val_set.shape[1], 1))
+    test_set = np.reshape(test_set, (test_set.shape[0], test_set.shape[1], 1))
+
+    train_labels = np.array(train_labels)
+    val_labels = np.array(val_labels)
+    test_labels = np.array(test_labels)
+
+    print("Train data shape: ", train_set.shape)
+    print("Validation data shape: ", val_set.shape)
+    print("Test data shape: ", test_set.shape)
+
+    return train_set, train_labels, val_set, val_labels, test_set, test_labels
+
+
+
+#Dataset are returned in channels-last format
+datasets = {
+    'synthetic' : load_synthetic_dataset,
+    #'unimib' :  unimib_load_dataset,
+    #'twister' : e4_load_dataset,
+    #'uci har' : uci_har_load_dataset,
+    #'sussex huawei' : sh_loco_load_dataset
+}
 
 
 
@@ -105,8 +202,8 @@ if __name__ == '__main__':
         X_test = np.array([scaler.fit_transform(Xi) for Xi in X_test])
 
         ### Run and Write Experiments
-        #run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}.csv".format(NOW))
-        run_and_write(exp_2, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp2_results_{}.csv".format(NOW))
+        run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}.csv".format(NOW))
+        #run_and_write(exp_2, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp2_results_{}.csv".format(NOW))
         #run_and_write(exp_3, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp3_results_{}.csv".format(NOW))
 
 
