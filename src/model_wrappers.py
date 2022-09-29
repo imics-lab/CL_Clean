@@ -521,7 +521,7 @@ class Supervised_C(nn.Module):
         """
         train_loader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
         val_loader = setup_dataloader(X_val, y_val, self.args, shuffle=True)
-        es = EarlyStopping(tolerance=7, min_delta=0.01)
+        es = EarlyStopping(tolerance=7, min_delta=0.001, mode='minimum')
         for epoch in range(self.args.n_epoch):
             print(f'Epoch {epoch}:')
             total_loss = 0
