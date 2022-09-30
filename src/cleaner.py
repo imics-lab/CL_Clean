@@ -247,7 +247,7 @@ def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
     sel_noisy = get_knn_acc_all_class(config, data_set, k=config.k, noise_prior=noisy_prior, sel_noisy=sel_noisy,
                                       thre_noise_rate=T_given_noisy, thre_true=T_given_noisy_true)
 
-    sel_noisy = np.array(sel_noisy, dtyp=int)
+    sel_noisy = np.array(sel_noisy, dtype=int)
     sel_clean = np.array(list(set(data_set['index'].tolist()) ^ set(sel_noisy)))
 
     noisy_in_sel_noisy = np.sum(train_dataset['noise_or_not'][sel_noisy]) / sel_noisy.shape[0]
