@@ -62,6 +62,7 @@ def exp_2(
 
     #Check for noisey labels, make them if necesary
     if os.path.exists(f'temp/{set}_test_labels_high_noise.npy'):
+        print("--- Found old noise labels ---")
         y_train_high = np.load(f'temp/{set}_train_labels_high_noise.npy')
         y_val_high = np.load(f'temp/{set}_val_labels_high_noise.npy')
         y_test_high = np.load(f'temp/{set}_test_labels_high_noise.npy')
@@ -71,6 +72,7 @@ def exp_2(
         y_test_low = np.load(f'temp/{set}_test_labels_low_noise.npy')
     else:
         num_classes = np.max(y_train)+1
+        print("--- Making new noise labels ---")
         y_train_low, _, y_train_high, _ = add_nar_from_array(y_train, num_classes)
         y_val_low, _, y_val_high, _ = add_nar_from_array(y_val, num_classes)
         y_test_low, _, y_test_high, _ = add_nar_from_array(y_test, num_classes)

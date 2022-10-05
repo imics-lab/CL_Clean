@@ -31,6 +31,7 @@ import multiprocessing
 from torchsummary import summary
 from har_util import _logger
 from early_stopping import EarlyStopping
+from cleaner import compute_apparent_clusterability_torch
 
 
 EMBEDDING_WIDTH = 96
@@ -521,11 +522,12 @@ class Supervised_C(nn.Module):
         """
         train_loader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
         val_loader = setup_dataloader(X_val, y_val, self.args, shuffle=True)
-        es = EarlyStopping(tolerance=7, min_delta=0.001, mode='minimum')
+        es = EarlyStopping(tolerance=7, min_delta=0.001, mode='maximum')
         for epoch in range(self.args.n_epoch):
             print(f'Epoch {epoch}:')
             total_loss = 0
             val_loss = 0
+            total_clusterability = 0
             for i, (x0, y0, d) in enumerate(train_loader):
                 self.optimizer.zero_grad()
                 x0 = x0.to(device)
@@ -552,14 +554,18 @@ class Supervised_C(nn.Module):
                     y_pred = self.classifier_block(f1)
                     loss = self.criterion(y_pred, y1)
                     val_loss += loss.item()
+                    batch_clusterability = compute_apparent_clusterability_torch(f1)
+                    total_clusterability += batch_clusterability.item()
             val_loss /= self.args.batch_size
-            es(val_loss)
+            total_clusterability /= self.args.batch_size
+            es(total_clusterability)
             if es.early_stop:
                 print(f'Stopping early at epoch {epoch}')
                 return
 
             print('Train loss: ', total_loss)
             print('Validation loss: ', val_loss)
+            print('Total clusterability: ', total_clusterability)
 
 
 
