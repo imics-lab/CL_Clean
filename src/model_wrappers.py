@@ -146,7 +146,8 @@ class Conv_AE(nn.Module):
         """
         Train cycle with early stopping
         """
-        X_train, y_train, X_val, y_val = shuffle(X_train, y_train, X_val, y_val, random_state=1899)
+        X_train, y_train = shuffle(X_train, y_train, random_state=1899)
+        X_val, y_val = shuffle(X_val, y_val, random_state=1899)
         train_loader = setup_dataloader(X_train,  np.zeros(X_train.shape[0]), self.args, shuffle=False)
         val_loader = setup_dataloader(X_val,  np.zeros(X_val.shape[0]), self.args, shuffle=False)
         es = EarlyStopping(tolerance=10, min_delta=0.001)
@@ -244,7 +245,8 @@ class SimCLR(nn.Module):
         Train cycle with validation
         Runs through max number of epochs and then reloads best snapshot
         """
-        X_train, y_train, X_val, y_val = shuffle(X_train, y_train, X_val, y_val, random_state=1899)
+        X_train, y_train = shuffle(X_train, y_train, random_state=1899)
+        X_val, y_val = shuffle(X_val, y_val, random_state=1899)
         train_dataloader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
 
         
@@ -383,7 +385,8 @@ class NNCLR(nn.Module):
         Train cycle with validation
         Runs through max number of epochs and then reloads best snapshot
         """
-        X_train, y_train, X_val, y_val = shuffle(X_train, y_train, X_val, y_val, random_state=1899)
+        X_train, y_train = shuffle(X_train, y_train, random_state=1899)
+        X_val, y_val = shuffle(X_val, y_val, random_state=1899)
         train_dataloader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
 
         val_dataloader = setup_dataloader(X_val, y_val, self.args, shuffle=True)
@@ -523,7 +526,8 @@ class Supervised_C(nn.Module):
         """
         Train cycle with early stopping
         """
-        X_train, y_train, X_val, y_val = shuffle(X_train, y_train, X_val, y_val, random_state=1899)
+        X_train, y_train = shuffle(X_train, y_train, random_state=1899)
+        X_val, y_val = shuffle(X_val, y_val, random_state=1899)
         train_loader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
         val_loader = setup_dataloader(X_val, y_val, self.args, shuffle=True)
         es = EarlyStopping(tolerance=7, min_delta=0.001, mode='maximum')
@@ -532,6 +536,7 @@ class Supervised_C(nn.Module):
             total_loss = 0
             val_loss = 0
             total_clusterability = 0
+            num_batches = 0
             for i, (x0, y0, d) in enumerate(train_loader):
                 self.optimizer.zero_grad()
                 x0 = x0.to(device)
@@ -558,10 +563,11 @@ class Supervised_C(nn.Module):
                     y_pred = self.classifier_block(f1)
                     loss = self.criterion(y_pred, y1)
                     val_loss += loss.item()
-                    batch_clusterability = compute_apparent_clusterability_torch(f1)
-                    total_clusterability += batch_clusterability.item()
+                    batch_clusterability = compute_apparent_clusterability_torch(f1, y1)
+                    total_clusterability += batch_clusterability
+                    num_batches += 1
             val_loss /= self.args.batch_size
-            total_clusterability /= self.args.batch_size
+            total_clusterability /= num_batches
             es(total_clusterability)
             if es.early_stop:
                 print(f'Stopping early at epoch {epoch}')

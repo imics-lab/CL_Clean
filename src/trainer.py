@@ -22,6 +22,8 @@ import seaborn as sns
 import fitlog
 from copy import deepcopy
 
+SKIP_EPOCHS = 5 #Don't save a best model from first 5 epochs
+
 recon = None
 nn_replacer = None
 
@@ -329,7 +331,7 @@ def train(train_loaders, val_loader, model, logger, fitlog, DEVICE, optimizers, 
                 # if total_loss <= min_val_loss:
                 #     min_val_loss = total_loss
                 #     best_model = copy.deepcopy(model.state_dict())
-                if total_clstr >= max_clstr:
+                if total_clstr >= max_clstr and epoch > SKIP_EPOCHS:
                     max_clstr = total_clstr
                     best_model = copy.deepcopy(model.state_dict())
                 logger.debug(f'Val Loss     : {total_loss / n_batches:.4f}')

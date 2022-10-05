@@ -348,6 +348,7 @@ def simiFeat(
         if not prediction:
             #What is the correct label???
             y_clean[i] = np.argmax(T[y[i]])
+            #y_clean[i] = np.round(aa[i])
     print("I have changed ", np.count_nonzero(sel_clean_summary==False)) 
     return y_clean, T           
             
