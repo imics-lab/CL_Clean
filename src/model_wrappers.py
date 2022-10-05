@@ -32,6 +32,7 @@ from torchsummary import summary
 from har_util import _logger
 from early_stopping import EarlyStopping
 from cleaner import compute_apparent_clusterability_torch
+from sklearn.utils import shuffle
 
 
 EMBEDDING_WIDTH = 96
@@ -145,8 +146,9 @@ class Conv_AE(nn.Module):
         """
         Train cycle with early stopping
         """
-        train_loader = setup_dataloader(X_train,  np.zeros(X_train.shape[0]), self.args, shuffle=True)
-        val_loader = setup_dataloader(X_val,  np.zeros(X_val.shape[0]), self.args, shuffle=True)
+        X_train, y_train, X_val, y_val = shuffle(X_train, y_train, X_val, y_val, random_state=1899)
+        train_loader = setup_dataloader(X_train,  np.zeros(X_train.shape[0]), self.args, shuffle=False)
+        val_loader = setup_dataloader(X_val,  np.zeros(X_val.shape[0]), self.args, shuffle=False)
         es = EarlyStopping(tolerance=10, min_delta=0.001)
         for epoch in range(self.args.n_epoch):
             print(f'Epoch {epoch}:')
@@ -242,7 +244,7 @@ class SimCLR(nn.Module):
         Train cycle with validation
         Runs through max number of epochs and then reloads best snapshot
         """
-        
+        X_train, y_train, X_val, y_val = shuffle(X_train, y_train, X_val, y_val, random_state=1899)
         train_dataloader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
 
         
@@ -381,6 +383,7 @@ class NNCLR(nn.Module):
         Train cycle with validation
         Runs through max number of epochs and then reloads best snapshot
         """
+        X_train, y_train, X_val, y_val = shuffle(X_train, y_train, X_val, y_val, random_state=1899)
         train_dataloader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
 
         val_dataloader = setup_dataloader(X_val, y_val, self.args, shuffle=True)
@@ -520,6 +523,7 @@ class Supervised_C(nn.Module):
         """
         Train cycle with early stopping
         """
+        X_train, y_train, X_val, y_val = shuffle(X_train, y_train, X_val, y_val, random_state=1899)
         train_loader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
         val_loader = setup_dataloader(X_val, y_val, self.args, shuffle=True)
         es = EarlyStopping(tolerance=7, min_delta=0.001, mode='maximum')
