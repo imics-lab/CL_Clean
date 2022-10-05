@@ -28,20 +28,20 @@ from cleaner import compute_apparent_clusterability
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
-K = 5
+K = 3
 WRITE_FEATURES = True
 WRITE_LABELS = True
 
 feature_learners = {
     "traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
-    "SimCLR + CNN" : SimCLR_C,
-    "SimCLR + T" : SimCLR_T,
-    "SimCLR + LSTM" : SimCLR_R,
-    # "NNCLR + CNN" : NNCLR_C,
-    # "NNCLR + T" : NNCLR_T,
-    # "NNCLR + LSTM" : NNCLR_R,
-    "Supervised Convolutional" : Supervised_C
+    #"SimCLR + CNN" : SimCLR_C,
+    #"SimCLR + T" : SimCLR_T,
+    #"SimCLR + LSTM" : SimCLR_R,
+    #"NNCLR + CNN" : NNCLR_C,
+    #"NNCLR + T" : NNCLR_T,
+    #"NNCLR + LSTM" : NNCLR_R,
+    #"Supervised Convolutional" : Supervised_C
 }
 
 def exp_1(

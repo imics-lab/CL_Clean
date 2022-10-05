@@ -26,13 +26,13 @@ from cleaner import simiFeat
 feature_learners = {
     "traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
-    "SimCLR + CNN" : SimCLR_C,
-    "SimCLR + T" : SimCLR_T,
-    "SimCLR + LSTM" : SimCLR_R,
-    "NNCLR + CNN" : NNCLR_C,
-    "NNCLR + T" : NNCLR_T,
-    "NNCLR + LSTM" : NNCLR_R,
-    "Supervised Convolutional" : Supervised_C
+    #"SimCLR + CNN" : SimCLR_C,
+    #"SimCLR + T" : SimCLR_T,
+    #"SimCLR + LSTM" : SimCLR_R,
+    #"NNCLR + CNN" : NNCLR_C,
+    #"NNCLR + T" : NNCLR_T,
+    #"NNCLR + LSTM" : NNCLR_R,
+    #"Supervised Convolutional" : Supervised_C
 }
 
 def exp_2(
@@ -117,8 +117,8 @@ def exp_2(
             else:
                 f_test = f_learner.get_features(X_test)
 
-            y_train_cleaned, _ = simiFeat(10, 3, f_train, y_train_noisy, "vote")
-            y_test_cleaned, _ = simiFeat(10, 3, f_test, y_test_noisy, "vote")
+            y_train_cleaned, _ = simiFeat(10, 3, f_train, y_train_noisy, "rank")
+            y_test_cleaned, _ = simiFeat(10, 3, f_test, y_test_noisy, "rank")
 
 
             if WRITE_LABELS:
