@@ -21,7 +21,7 @@ import numpy as np
 from sklearn.metrics import precision_score, recall_score, f1_score
 from model_wrappers import *
 from utils.add_nar import add_nar_from_array
-from cleaner import simiFeat
+from cleaner import rising_K_nearest_neighbors, simiFeat
 
 feature_learners = {
     "traditional" : Engineered_Features,
@@ -31,7 +31,7 @@ feature_learners = {
     #"SimCLR + LSTM" : SimCLR_R,
     #"NNCLR + CNN" : NNCLR_C,
     #"NNCLR + T" : NNCLR_T,
-    "NNCLR + LSTM" : NNCLR_R,
+    #"NNCLR + LSTM" : NNCLR_R,
     #"Supervised Convolutional" : Supervised_C
 }
 
@@ -119,8 +119,11 @@ def exp_2(
             else:
                 f_test = f_learner.get_features(X_test)
 
-            y_train_cleaned, _ = simiFeat(10, 3, f_train, y_train_noisy, "rank")
-            y_test_cleaned, _ = simiFeat(10, 3, f_test, y_test_noisy, "rank")
+            # y_train_cleaned, _ = simiFeat(10, 3, f_train, y_train_noisy, "rank")
+            # y_test_cleaned, _ = simiFeat(10, 3, f_test, y_test_noisy, "rank")
+
+            y_train_cleaned, _ = rising_K_nearest_neighbors(f_train, y_train_noisy, 3, 7)
+            y_test_cleaned, _ = rising_K_nearest_neighbors(f_test, y_test_noisy, 3, 7)
 
 
             if WRITE_LABELS:

@@ -40,7 +40,7 @@ feature_learners = {
     #"SimCLR + LSTM" : SimCLR_R,
     #"NNCLR + CNN" : NNCLR_C,
     #"NNCLR + T" : NNCLR_T,
-    "NNCLR + LSTM" : NNCLR_R,
+    #"NNCLR + LSTM" : NNCLR_R,
     #"Supervised Convolutional" : Supervised_C
 }
 

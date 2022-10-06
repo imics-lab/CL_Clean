@@ -237,8 +237,6 @@ def noniterate_detection(config, record, train_dataset, sel_noisy=[]):
 
 
         T_given_noisy = T * p / noisy_prior
-        print("T given noisy:")
-        print(np.round(T_given_noisy, 2))
         # add randomness
         for i in range(T.shape[0]):
             T_given_noisy[i][i] += np.random.uniform(low=-0.05, high=0.05)
@@ -352,7 +350,75 @@ def simiFeat(
     print("I have changed ", np.count_nonzero(sel_clean_summary==False)) 
     return y_clean, T           
             
-    
+def rising_K_nearest_neighbors(
+    X : np.ndarray, 
+    y : np.ndarray, 
+    start_k: int,
+    end_k : int
+):
+    """
+    All-KNN + HOC
+    Predict new labels for noisy instances using rising values of K,
+      with a transition matrix estimated using HOC
+
+    Start_k and end_k are both inclusive bounds
+
+    Returns: the cleaned label set
+    """
+    global global_dic
+    if y.ndim > 1:
+        y = np.argmax(y, axis=-1)
+
+    num_class = np.nanmax(y)+1
+
+    y_clean = y.copy()
+
+    for k in range(start_k, end_k+1):
+        print(f'Cleaning epoch k={k}')
+
+        config.k = k
+
+        data_set = {
+            'feature' : torch.Tensor(X),
+            'noisy_label' : torch.Tensor(y_clean),
+        }
+
+        if 'T_init' in global_dic.keys():
+                T_init = global_dic['T_init']
+        else:
+            T_init = None
+
+        if 'p_init' in global_dic.keys():
+            p_init = global_dic['p_init']
+        else:
+            p_init = None
+
+        T, p, global_dic = get_T_global_min_new(
+            config, data_set=data_set, max_step=config.max_iter if T_init is None else 20,
+            lr=0.1 if T_init is None else 0.01, NumTest=config.G, T0=T_init, p0=p_init, 
+            global_dic=global_dic
+        )
+
+        noisy_prior = np.array([np.count_nonzero(y_clean==i) for i in range(num_class)])
+        T_given_noisy = T * p / noisy_prior
+        # add randomness
+        for i in range(T.shape[0]):
+            T_given_noisy[i][i] += np.random.uniform(low=-0.05, high=0.05)
+        
+        neigh = NearestNeighbors(n_neighbors=k+1, radius=1.0, metric='cosine', n_jobs=8)
+        neigh.fit(X)
+        n = neigh.kneighbors(X, k+1, return_distance=False)
+        n = np.delete(n, 0, axis=1)
+
+        for i, row in enumerate(n):
+            neigh_labels = [y_clean[j] for j in row]
+            pred_y = stats.mode(neigh_labels)
+            support = np.count_nonzero(neigh_labels==pred_y)
+            assigned_y = y_clean[i]
+            if pred_y != assigned_y:
+                y_clean = pred_y if support * T[assigned_y][pred_y] > (k/2) else assigned_y
+
+    return y_clean
 
 
 if __name__ == '__main__':
