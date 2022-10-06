@@ -22,7 +22,7 @@ import os
 import torch
 import argparse
 
-CLEANUP = False
+CLEANUP = True
 
 parser = argparse.ArgumentParser(description='argument setting of network')
 parser.add_argument('--set', default='synthetic', type=str, help='Data Set')

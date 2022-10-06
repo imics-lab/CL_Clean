@@ -33,6 +33,7 @@ from har_util import _logger
 from early_stopping import EarlyStopping
 from cleaner import compute_apparent_clusterability_torch
 from sklearn.utils import shuffle
+import pandas as pd
 
 
 EMBEDDING_WIDTH = 96
@@ -522,7 +523,7 @@ class Supervised_C(nn.Module):
             criterion="", 
             n_class=self.n_classes)
 
-    def fit(self, X_train, y_train=None, X_val=None, y_val=None) -> None:
+    def fit(self, X_train, y_train=None, X_val=None, y_val=None, record_values=False) -> None:
         """
         Train cycle with early stopping
         """
@@ -531,6 +532,14 @@ class Supervised_C(nn.Module):
         train_loader = setup_dataloader(X_train, y_train, self.args, shuffle=True)
         val_loader = setup_dataloader(X_val, y_val, self.args, shuffle=True)
         es = EarlyStopping(tolerance=7, min_delta=0.001, mode='maximum')
+        if record_values:
+            record = {
+                'Val Loss' : [],
+                'Train Loss' : [],
+                'Clusterability' : []
+            }
+        else:
+            record = None
         for epoch in range(self.args.n_epoch):
             print(f'Epoch {epoch}:')
             total_loss = 0
@@ -569,6 +578,10 @@ class Supervised_C(nn.Module):
             val_loss /= self.args.batch_size
             total_clusterability /= num_batches
             es(total_clusterability)
+            if record_values:
+                record['Val Loss'].append(val_loss)
+                record['Train Loss'].append(total_loss)
+                record['Clusterability'].append(total_clusterability)
             if es.early_stop:
                 print(f'Stopping early at epoch {epoch}')
                 return
@@ -576,6 +589,9 @@ class Supervised_C(nn.Module):
             print('Train loss: ', total_loss)
             print('Validation loss: ', val_loss)
             print('Total clusterability: ', total_clusterability)
+        if record_values:
+            df = pd.DataFrame.from_dict(record)
+            df.to_csv('results/train_values.csv', index=True)
 
 
 
