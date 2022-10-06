@@ -56,7 +56,7 @@ def similarity_matrix(mat: torch.Tensor):
 def compute_apparent_clusterability_torch(
     fet : torch.Tensor,
     y   : torch.Tensor
-):
+) -> float:
     """
     Compute that percentage of instances in the feature space that
     share an assigned label with their 2 nearest neighbors
@@ -89,7 +89,7 @@ def setup_dataloader(X : np.ndarray, y : np.ndarray, shuffle=False):
 def compute_apparent_clusterability(
     fet : np.ndarray,
     y   : np.ndarray,
-):
+) -> float:
     """
     Compute that percentage of instances in the feature space that
     share an assigned label with their 2 nearest neighbors
