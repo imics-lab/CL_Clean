@@ -176,42 +176,46 @@ if __name__ == '__main__':
 
     NOW = datetime.now()
 
-    for set in datasets.keys():
-        print (f"###   Running {set} ### ")
-        
-        ### Fetch Dataset ###
-        X_train, y_train, X_val, y_val, X_test, y_test = datasets[set](
-            incl_xyz_accel=True, incl_rms_accel=False, incl_val_group=True
-        )
+    args = parser.parse_args()
 
-        ### Sanity Checks ###
-        print(f'Shape of train X: {X_train.shape}')
-        print(f'Shape of val X: {X_val.shape}')
-        print(f'Shape of test X: {X_test.shape}')
+    #for set in datasets.keys():
 
-        ### Channels first and flatten labels
-        ### Update: CL HAR prefers channels last
-        X_train = channel_swap(X_train)
-        X_test = channel_swap(X_test)
-        X_val = channel_swap(X_val)
+    set = args.set
+    print (f"###   Running {set} ### ")
+    
+    ### Fetch Dataset ###
+    X_train, y_train, X_val, y_val, X_test, y_test = datasets[set](
+        incl_xyz_accel=True, incl_rms_accel=False, incl_val_group=True
+    )
 
-        y_train = np.array(np.argmax(y_train, axis=-1))
-        y_val = np.array(np.argmax(y_val, axis=-1))
-        y_test = np.array(np.argmax(y_test, axis=-1))
+    ### Sanity Checks ###
+    print(f'Shape of train X: {X_train.shape}')
+    print(f'Shape of val X: {X_val.shape}')
+    print(f'Shape of test X: {X_test.shape}')
 
+    ### Channels first and flatten labels
+    ### Update: CL HAR prefers channels last
+    X_train = channel_swap(X_train)
+    X_test = channel_swap(X_test)
+    X_val = channel_swap(X_val)
 
-        ### Bound data to range -1 to 1
-        scaler = MinMaxScaler(feature_range=(-1, 1))
-        #scaler.fit(X_train)
-        #X_train = np.array([scaler.fit_transform(Xi) for Xi in X_train])
-        #X_val = np.array([scaler.fit_transform(Xi) for Xi in X_val])
-        #X_test = np.array([scaler.fit_transform(Xi) for Xi in X_test])
-
-        ### Run and Write Experiments
-        run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}_{}.csv".format(set, NOW))
-        run_and_write(exp_2, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp2_results_{}_{}.csv".format(set, NOW))
-        #run_and_write(exp_3, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp3_results_{}_{}.csv".format(set, NOW))
+    y_train = np.array(np.argmax(y_train, axis=-1))
+    y_val = np.array(np.argmax(y_val, axis=-1))
+    y_test = np.array(np.argmax(y_test, axis=-1))
 
 
-        if CLEANUP:
-            cleanup()
+    ### Bound data to range -1 to 1
+    scaler = MinMaxScaler(feature_range=(-1, 1))
+    #scaler.fit(X_train)
+    #X_train = np.array([scaler.fit_transform(Xi) for Xi in X_train])
+    #X_val = np.array([scaler.fit_transform(Xi) for Xi in X_val])
+    #X_test = np.array([scaler.fit_transform(Xi) for Xi in X_test])
+
+    ### Run and Write Experiments
+    run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}_{}.csv".format(set, NOW))
+    run_and_write(exp_2, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp2_results_{}_{}.csv".format(set, NOW))
+    #run_and_write(exp_3, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp3_results_{}_{}.csv".format(set, NOW))
+
+
+    if CLEANUP:
+        cleanup()
