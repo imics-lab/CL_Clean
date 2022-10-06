@@ -373,14 +373,21 @@ def rising_K_nearest_neighbors(
 
     y_clean = y.copy()
 
+    config.num_classes = num_class
+    config.cnt = X.shape[0]
+
+    change_total = 0
+
     for k in range(start_k, end_k+1):
         print(f'Cleaning epoch k={k}')
 
         config.k = k
 
+        change_for_epoch = 0
+
         data_set = {
             'feature' : torch.Tensor(X),
-            'noisy_label' : torch.Tensor(y_clean),
+            'noisy_label' : torch.Tensor(y_clean).long(),
         }
 
         if 'T_init' in global_dic.keys():
@@ -412,13 +419,20 @@ def rising_K_nearest_neighbors(
 
         for i, row in enumerate(n):
             neigh_labels = [y_clean[j] for j in row]
-            pred_y = stats.mode(neigh_labels)
-            support = np.count_nonzero(neigh_labels==pred_y)
+            m = stats.mode(neigh_labels, axis=None)
+            #m -> tuplle of (mode, count)
+            pred_y = m[0][0]
+            support = m[1]
             assigned_y = y_clean[i]
             if pred_y != assigned_y:
-                y_clean = pred_y if support * T[assigned_y][pred_y] > (k/2) else assigned_y
+                y_clean[i] = pred_y if support * T[assigned_y][pred_y] > (k/2) else assigned_y
+        
+        change_for_epoch += np.count_nonzero(y != y_clean) - change_total
+        change_total += change_for_epoch
+        print(f'Labels changed this epoch : {change_for_epoch}')
 
-    return y_clean
+    print('Total labels changed: {}'.format(np.count_nonzero(y != y_clean)))
+    return y_clean, T_given_noisy
 
 
 if __name__ == '__main__':

@@ -156,9 +156,9 @@ def load_synthetic_dataset(incl_xyz_accel=True, incl_rms_accel=False, incl_val_g
 
 #Dataset are returned in channels-last format
 datasets = {
-    'synthetic' : load_synthetic_dataset,
+    #'synthetic' : load_synthetic_dataset,
     #'unimib' :  unimib_load_dataset,
-    #'twister' : e4_load_dataset,
+    'twister' : e4_load_dataset,
     #'uci har' : uci_har_load_dataset,
     #'sussex huawei' : sh_loco_load_dataset
 }
