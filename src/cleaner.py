@@ -425,13 +425,14 @@ def rising_K_nearest_neighbors(
             support = m[1]
             assigned_y = y_clean[i]
             if pred_y != assigned_y:
-                y_clean[i] = pred_y if support * T[assigned_y][pred_y] > (k/2) else assigned_y
+                y_clean[i] = pred_y if (support * T[assigned_y][pred_y] > (k/2) or support == k) else assigned_y
         
         change_for_epoch += np.count_nonzero(y != y_clean) - change_total
         change_total += change_for_epoch
         print(f'Labels changed this epoch : {change_for_epoch}')
 
     print('Total labels changed: {}'.format(np.count_nonzero(y != y_clean)))
+    print(T_given_noisy)
     return y_clean, T_given_noisy
 
 

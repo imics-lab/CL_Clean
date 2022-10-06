@@ -20,10 +20,12 @@ import numpy as np
 import pandas as pd
 import os
 import torch
+import argparse
 
 CLEANUP = False
 
-
+parser = argparse.ArgumentParser(description='argument setting of network')
+parser.add_argument('--set', default='synthetic', type=str, help='Data Set')
 
 def channel_swap(X : np.ndarray) -> np.ndarray:
     """
@@ -59,9 +61,9 @@ def run_and_write(
         file_frame.to_csv(filename, index=False)
 
 def load_synthetic_dataset(incl_xyz_accel=True, incl_rms_accel=False, incl_val_group=True):
-    NUM_TRAIN = 1000
-    NUM_VAL = 100
-    NUM_TEST = 100
+    NUM_TRAIN = 1001
+    NUM_VAL = 101
+    NUM_TEST = 101
     NUM_CLASSES = 2
     INSTANCE_LEN = 150
 
