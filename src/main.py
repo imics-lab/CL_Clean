@@ -158,11 +158,11 @@ def load_synthetic_dataset(incl_xyz_accel=True, incl_rms_accel=False, incl_val_g
 
 #Dataset are returned in channels-last format
 datasets = {
-    #'synthetic' : load_synthetic_dataset,
-    #'unimib' :  unimib_load_dataset,
+    'synthetic' : load_synthetic_dataset,
+    'unimib' :  unimib_load_dataset,
     'twister' : e4_load_dataset,
-    #'uci har' : uci_har_load_dataset,
-    #'sussex huawei' : sh_loco_load_dataset
+    'uci har' : uci_har_load_dataset,
+    'sussex huawei' : sh_loco_load_dataset
 }
 
 
@@ -214,7 +214,7 @@ if __name__ == '__main__':
     ### Run and Write Experiments
     run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}_{}.csv".format(set, NOW))
     run_and_write(exp_2, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp2_results_{}_{}.csv".format(set, NOW))
-    #run_and_write(exp_3, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp3_results_{}_{}.csv".format(set, NOW))
+    run_and_write(exp_3, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp3_results_{}_{}.csv".format(set, NOW))
 
 
     if CLEANUP:
