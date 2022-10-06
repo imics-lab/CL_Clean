@@ -540,6 +540,7 @@ class Supervised_C(nn.Module):
             }
         else:
             record = None
+            
         for epoch in range(self.args.n_epoch):
             print(f'Epoch {epoch}:')
             total_loss = 0
