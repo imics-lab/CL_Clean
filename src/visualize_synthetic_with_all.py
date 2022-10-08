@@ -14,17 +14,20 @@ umap_neighbors = 15
 umap_dim = 2
 
 feature_learners = {
-    "None" : None_Extractor,
+    "Raw Data" : None_Extractor,
     "Engineered" : Engineered_Features,
     #"CAE" : Conv_AE,
-    #"SimCLR + CNN" : SimCLR_C,
-    #"SimCLR + Tran" : SimCLR_T,
-    #"SimCLR + LSTM" : SimCLR_R,
-    #"NNCLR + CNN" : NNCLR_C,
-    #"NNCLR + Tran" : NNCLR_T,
-    #"NNCLR + LSTM" : NNCLR_R,
-    #"Sup. CNN" : Supervised_C
+    "SimCLR + CNN" : SimCLR_C,
+    "SimCLR + Tran" : SimCLR_T,
+    "SimCLR + LSTM" : SimCLR_R,
+    "NNCLR + CNN" : NNCLR_C,
+    "NNCLR + Tran" : NNCLR_T,
+    "NNCLR + LSTM" : NNCLR_R,
+    "Sup. CNN" : Supervised_C
 }
+
+p = ['maroon', 'royalblue']
+m = ['.', '+']
 
 if __name__ == '__main__':
     X_train, y_train, X_val, y_val, X_test, y_test = load_synthetic_dataset(
@@ -33,6 +36,9 @@ if __name__ == '__main__':
 
     X_train = channel_swap(X_train)
     X_val = channel_swap(X_val)
+
+    y_train = np.argmax(y_train, axis=-1)
+    y_val = np.argmax(y_val, axis=-1)
 
     y_train_low, _, y_train_high, _ = add_nar_from_array(y_train, 2)
 
@@ -48,31 +54,34 @@ if __name__ == '__main__':
         #figure with no noise
         plt.figure()
         if umap_dim==2:
-            plt.scatter(embedding[:,0], embedding[:,1], c=y_train)
+            plt.scatter(embedding[:,0], embedding[:,1], c=[p[i] for i in y_train])
         else:
             ax = plt.axes(projection ="3d")
             ax.scatter(embedding[:,0], embedding[:,1], embedding[:,2], c=y_train)
-
+        plt.title(f'{extractor_name} No Noise', fontsize=32)
+        plt.axis('off')
         plt.savefig(f'imgs/syn_with_{extractor_name}_no_noise.pdf')
 
         #figure with 5% noise
         plt.figure()
         if umap_dim==2:
-            plt.scatter(embedding[:,0], embedding[:,1], c=y_train)
+            plt.scatter(embedding[:,0], embedding[:,1], c=[p[i] for i in y_train_low])
         else:
             ax = plt.axes(projection ="3d")
             ax.scatter(embedding[:,0], embedding[:,1], embedding[:,2], c=y_train_low)
-
+        plt.title(f'{extractor_name} 5% Noise', fontsize=32)
+        plt.axis('off')
         plt.savefig(f'imgs/syn_with_{extractor_name}_5per_noise.pdf')
 
         #figure with 10% noise
         plt.figure()
         if umap_dim==2:
-            plt.scatter(embedding[:,0], embedding[:,1], c=y_train)
+            plt.scatter(embedding[:,0], embedding[:,1], c=[p[i] for i in y_train_high])
         else:
             ax = plt.axes(projection ="3d")
             ax.scatter(embedding[:,0], embedding[:,1], embedding[:,2], c=y_train_high)
-
+        plt.title(f'{extractor_name} 10% Noise', fontsize=32)
+        plt.axis('off')
         plt.savefig(f'imgs/syn_with_{extractor_name}_10per_noise.pdf')
 
         del extractor
