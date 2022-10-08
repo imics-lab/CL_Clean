@@ -25,7 +25,7 @@ import argparse
 CLEANUP = True
 
 parser = argparse.ArgumentParser(description='argument setting of network')
-parser.add_argument('--set', default='synthetic', type=str, help='Data Set')
+parser.add_argument('--set', default='sussex huawei', type=str, help='Data Set')
 
 def channel_swap(X : np.ndarray) -> np.ndarray:
     """
