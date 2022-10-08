@@ -548,6 +548,7 @@ class Supervised_C(nn.Module):
             total_clusterability = 0
             num_batches = 0
             for i, (x0, y0, d) in enumerate(train_loader):
+                if x0.size(0) != self.args.batch_size: continue
                 self.optimizer.zero_grad()
                 x0 = x0.to(device)
                 y0 = y0.type(torch.LongTensor)
@@ -566,6 +567,7 @@ class Supervised_C(nn.Module):
             print('\n')
             with torch.no_grad():
                 for (x1, y1, d) in val_loader:
+                    if x1.size(0) != self.args.batch_size: continue
                     x1 = x1.to(device)
                     y1 = y1.type(torch.LongTensor)
                     y1 = y1.to(device)
