@@ -103,6 +103,17 @@ def setup_dataloader(X : np.ndarray, y : np.ndarray, args : ArgHolder, shuffle=F
     )
     return dataloader
 
+class None_Extractor():
+    def __init__(self,X, y): pass
+    def fit(self, X, y, Xv, yv): pass
+    def get_features(self, X):
+        if X.ndim == 2:
+            return X
+        else:
+            if X.shape[1] == 1: 
+                return np.reshape(X, (X.shape[0], X.shape[2]))
+            else:
+                return np.array([np.linalg.norm(i, axis=0) for i in X])
 
 class Engineered_Features():
     def __init__(self, X, y=None) -> None:
