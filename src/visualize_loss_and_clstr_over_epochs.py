@@ -40,4 +40,4 @@ if __name__ == '__main__':
     ax2.set_ylabel('Clusterability')
     ax2.plot(range(120), train_info['Clusterability'], c=p[2])
     plt.title('Loss and Clusterability during Trainging', fontsize=18)
-    plt.show()
+    fig.savefig('imgs/loss_and_clstr_during_train.pdf')
