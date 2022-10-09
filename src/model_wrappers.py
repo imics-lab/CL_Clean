@@ -596,13 +596,12 @@ class Supervised_C(nn.Module):
                 record['Val Loss'].append(val_loss)
                 record['Train Loss'].append(total_loss)
                 record['Clusterability'].append(total_clusterability)
-            if es.early_stop:
-                print(f'Stopping early at epoch {epoch}')
-                return
-
             print('Train loss: ', total_loss)
             print('Validation loss: ', val_loss)
             print('Total clusterability: ', total_clusterability)
+            # if es.early_stop:
+            #     print(f'Stopping early at epoch {epoch}')
+            #     break
         if record_values:
             df = pd.DataFrame.from_dict(record)
             df.to_csv('results/train_values.csv', index=True)
