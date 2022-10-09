@@ -152,4 +152,11 @@ if __name__ == '__main__':
     plt.title("Train Clusterability vs. Accuracy")
     for i, set in enumerate(accuracis.keys()):
         plt.scatter(train_clstr[set], accuracis[set], c=p[i], marker='.')
-    plt.show()
+    plt.savefig('imgs/train_clusterability_vs_accuracy.pdf')
+
+    #Plot test clstr vs. final accuracy
+    plt.figure()
+    plt.title("Test Clusterability vs. Accuracy")
+    for i, set in enumerate(accuracis.keys()):
+        plt.scatter(test_clstr[set], accuracis[set], c=p[i], marker='.')
+    plt.savefig('imgs/test_clusterability_vs_accuracy.pdf')
