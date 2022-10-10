@@ -7,7 +7,6 @@
 from main import channel_swap
 from load_data_time_series.HAR.e4_wristband_Nov2019.e4_load_dataset import e4_load_dataset
 import matplotlib.pyplot as plt
-import torch
 from torch import nn
 import numpy as np
 from model_wrappers import Supervised_C
@@ -32,12 +31,13 @@ if __name__ == '__main__':
     train_info = pd.read_csv('results/train_values.csv')
 
     fig,ax = plt.subplots()
-    ax.plot(range(120), train_info['Train Loss'], c=p[0])
-    ax.plot(range(120), train_info['Val Loss'], c=p[1])
+    ax.plot(range(120), train_info['Train Loss'], c=p[0], label='Train Loss')
+    ax.plot(range(120), train_info['Val Loss'], c=p[1], label='Validation Loss')
     ax.set_xlabel('Training Epochs')
     ax.set_ylabel('Loss')
     ax2 = ax.twinx()
     ax2.set_ylabel('Clusterability')
-    ax2.plot(range(120), train_info['Clusterability'], c=p[2])
+    ax2.plot(range(120), train_info['Clusterability'], c=p[2], label='Clusterability')
     plt.title('Loss and Clusterability during Trainging', fontsize=18)
+    fig.legend(loc='center')
     fig.savefig('imgs/loss_and_clstr_during_train.pdf')
