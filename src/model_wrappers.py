@@ -43,7 +43,7 @@ WEIGHT_DECAY = 1e-5
 NN_MEM = 1024 #size in megabytes
 CL_EPOCHS = 120
 NUM_WORKERS = 16
-BATCH_SIZE = 100
+BATCH_SIZE = 128
 
 LOG = _logger('temp/train_log.txt')
 
@@ -599,9 +599,9 @@ class Supervised_C(nn.Module):
             print('Train loss: ', total_loss)
             print('Validation loss: ', val_loss)
             print('Total clusterability: ', total_clusterability)
-            # if es.early_stop:
-            #     print(f'Stopping early at epoch {epoch}')
-            #     break
+            if es.early_stop:
+                print(f'Stopping early at epoch {epoch}')
+                break
         if record_values:
             df = pd.DataFrame.from_dict(record)
             df.to_csv('results/train_values.csv', index=True)
