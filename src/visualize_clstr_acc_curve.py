@@ -4,8 +4,10 @@
 #
 #Make some nice models with a common interface
 
+from audioop import avg
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 train_clstr = {
     'Twristar' : [
@@ -136,33 +138,162 @@ accuracis = {
      ]
 }
 
+
+
 p = ['maroon', 'royalblue', 'forestgreen', 'sandybrown', 'rebeccapurple']
+
+avg_delta_acc = [
+    [0.06,	0.02,	0.03,	0.07,	0.01],
+    [0.03,	0.06,	0.01,	-0.04,	0.01],
+    [0.00,	-0.01,	0.02,	0.18,	-0.03],
+    [0.00,	0.02,	-0.01,	-0.05,	0.00],
+    [0.05,	0.06,	0.01,	0.03,	0.01],
+    [0.00,	-0.03,	-0.01,	0.03,	0.00],
+    [0.00,	0.01,	0.02,	0.00,	0.00],
+    [0.00,	0.04,	0.03,	-0.07,	0.00]
+]
 
 if __name__ == '__main__':
     
-    #Plot train vs. test clusterability
-    plt.figure()
-    plt.title('Train vs. Test Clusterability', fontsize=24)
-    for i, set in enumerate(test_clstr.keys()):
-        plt.scatter(train_clstr[set], test_clstr[set], c=p[i], marker='.')
-    plt.xlabel('Train')
-    plt.ylabel('Test')
-    plt.savefig('imgs/train_v_test_clusterability.pdf')
+    # #Plot train vs. test clusterability
+    # plt.figure()
+    # plt.title('Train vs. Test Clusterability', fontsize=14)
+    # for i, set in enumerate(test_clstr.keys()):
+    #     plt.scatter(train_clstr[set], test_clstr[set], c=p[i], marker='.')
+    # plt.xlabel('Train', fontsize=14)
+    # plt.ylabel('Test', fontsize=14)
+    # plt.savefig('imgs/train_v_test_clusterability.pdf')
 
-    #Plot train clstr vs. final accuracy
-    plt.figure()
-    plt.title("Train Clusterability vs. Accuracy", fontsize=24)
-    for i, set in enumerate(accuracis.keys()):
-        plt.scatter(train_clstr[set], accuracis[set], c=p[i], marker='.')
-    plt.xlabel('Clusterability')
-    plt.ylabel('Accuracy')
-    plt.savefig('imgs/train_clusterability_vs_accuracy.pdf')
+    # #Plot train clstr vs. final accuracy
+    # plt.figure()
+    # plt.title("Train Clusterability vs. Accuracy", fontsize=14)
+    # for i, set in enumerate(accuracis.keys()):
+    #     plt.scatter(train_clstr[set], accuracis[set], c=p[i], marker='.')
+    # plt.xlabel('Clusterability', fontsize=14)
+    # plt.ylabel('Accuracy', fontsize=14)
+    # plt.savefig('imgs/train_clusterability_vs_accuracy.pdf')
 
-    #Plot test clstr vs. final accuracy
-    plt.figure()
-    plt.title("Test Clusterability vs. Accuracy", fontsize=24)
-    for i, set in enumerate(accuracis.keys()):
-        plt.scatter(test_clstr[set], accuracis[set], c=p[i], marker='.')
-    plt.xlabel('Clusterability')
-    plt.ylabel('Accuracy')
-    plt.savefig('imgs/test_clusterability_vs_accuracy.pdf')
+    # #Plot test clstr vs. final accuracy
+    # plt.figure()
+    # plt.title("Test Clusterability vs. Accuracy", fontsize=14)
+    # for i, set in enumerate(accuracis.keys()):
+    #     plt.scatter(test_clstr[set], accuracis[set], c=p[i], marker='.')
+    # plt.xlabel('Clusterability', fontsize=14)
+    # plt.ylabel('Accuracy', fontsize=14)
+    # plt.savefig('imgs/test_clusterability_vs_accuracy.pdf')
+
+    # #Plot delta accuracy heatmap
+    # avg_delta_acc_percents = np.zeros((8, 5))
+    # for i in range(8):
+    #     for j in range(5):
+    #         avg_delta_acc_percents[i, j] = avg_delta_acc[i][j]*100
+    # fig, ax = plt.subplots()
+    # plt.title('Avg Change in Acc. After Cleaning.')
+    # e = ['Engineered', 'SimCLR+CNN', 'SimCLR+Tran', 'SimCLR+LSTM', 'NNCLR+CNN', 'NNCLR+Tran', 'NNCLR+LSTM', 'Sup. CNN']
+    # s = ['Synth.', 'UniMiB', 'UCI', 'Twristar', 'SH Loco.']
+    # ax.imshow(avg_delta_acc, cmap='bone')
+    # ax.set_yticks(range(8), e)
+    # ax.set_xticks(range(5), s)
+    # plt.setp(ax.get_xticklabels(), rotation=30, ha="right",
+    #      rotation_mode="anchor")
+    # plt.setp(ax.get_yticklabels(), rotation=30, ha="right",
+    #     rotation_mode="anchor")
+    # for i in range(8):
+    #     for j in range(5):
+    #         ax.text(j, i, '{:.1f}%'.format(avg_delta_acc_percents[i][j]), ha="center", va="center", color="w" if abs(avg_delta_acc_percents[i][j]) < 10 else "black")
+    # plt.savefig('imgs/accuracy_heatmap.pdf')
+    # #plt.show()
+
+    #Plot change in accuracy bargraph
+    FEATURES = 1
+    NOISE_PERCENT = 2
+    ACC = 5
+
+    exp3_df = pd.read_csv('results/canonical_results_exp3.csv')
+    averaged_raw_accuracies = {}
+
+    sets = exp3_df['set']
+    feats = exp3_df['features']
+    accs = exp3_df['accuracy on clean test']
+    noises = exp3_df['noise percent']
+
+    for i in range(len(sets)):
+
+        if feats[i] not in averaged_raw_accuracies.keys():
+            averaged_raw_accuracies[feats[i]] = {
+                'Zero' : 0,
+                'Five Uncleaned' : 0,
+                'Five Cleaned' : 0,
+                'Ten Uncleaned' : 0,
+                'Ten Cleaned' : 0
+            }
+
+        #print(f'{sets[i]}, {feats[i]}, {noises[i]}, {accs[i]}')
+        if noises[i] == '0' : 
+            averaged_raw_accuracies[feats[i]]['Zero'] += accs[i]
+        elif noises[i] == '5' : 
+            averaged_raw_accuracies[feats[i]]['Five Uncleaned'] += accs[i]
+        elif noises[i] == '5-cleaned' :
+            #print(sets[i], ' ', feats[i], ' ', noises[i]) 
+            averaged_raw_accuracies[feats[i]]['Five Cleaned'] += accs[i]
+        elif noises[i] == '10' : 
+            averaged_raw_accuracies[feats[i]]['Ten Uncleaned'] += accs[i]
+        elif noises[i] == '10-cleaned' : 
+            averaged_raw_accuracies[feats[i]]['Ten Cleaned'] += accs[i]
+        else: print('Encountered the unknowable')
+
+    zero_bars = []
+    f_u_bars = []
+    f_c_bars = []
+    t_u_bars = []
+    t_c_bars = []
+
+    for f in averaged_raw_accuracies.keys():
+        for n in averaged_raw_accuracies[f].keys():
+            averaged_raw_accuracies[f][n] /= 5 #divide by number of sets
+            print(f'{f} {n}: {averaged_raw_accuracies[f][n]}')
+
+    for f in averaged_raw_accuracies.keys():
+        zero_bars.append(averaged_raw_accuracies[f]['Zero'])
+        f_u_bars.append(averaged_raw_accuracies[f]['Five Uncleaned'])
+        f_c_bars.append(averaged_raw_accuracies[f]['Five Cleaned'])
+        t_u_bars.append(averaged_raw_accuracies[f]['Ten Uncleaned'])
+        t_c_bars.append(averaged_raw_accuracies[f]['Ten Cleaned'])
+
+    labels = ['Engineered', 'SimCLR+CNN', 'SimCLR+Tran', 'SimCLR+LSTM', 'NNCLR+CNN', 'NNCLR+Tran', 'NNCLR+LSTM', 'Sup. CNN']
+    
+    x = np.arange(len(labels))
+    width = 0.15
+    fig, ax = plt.subplots()
+    
+    rects1 = ax.bar(x - 2*width, zero_bars, width, label='Zero Noise', color=p[0])
+    rects2 = ax.bar(x - width, f_u_bars, width, label='5% Uncleaned', color=p[1])
+    rects3 = ax.bar(x, f_c_bars, width, label='5% Cleaned', color=p[2])
+    rects4 = ax.bar(x + width, t_u_bars, width, label='10% Uncleaned', color=p[3])
+    rects5 = ax.bar(x + 2*width, t_c_bars, width, label='10% Cleaned', color=p[4])
+
+    ax.set_ylabel('Accuracy')
+    ax.set_title('Avg Accuracy by Feature Extractor')
+    ax.set_xticks(x, labels)
+    ax.legend()
+    ax.set_ylim([.35, .80])
+
+    plt.setp(ax.get_xticklabels(), rotation=30, ha="right", rotation_mode="anchor")
+
+    fig.tight_layout()
+
+    #plt.show()
+    plt.savefig('imgs/accuracry bar chart.pdf')
+    
+
+
+
+
+
+
+        
+
+        
+
+
+
