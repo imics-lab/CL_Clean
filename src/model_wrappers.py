@@ -475,7 +475,7 @@ class NNCLR_T(NNCLR):
 
 class NNCLR_R(NNCLR):
     def __init__(self, X, y=None) -> None:
-        super(NNCLR_R, self).__init__(X, y, 'CNN')
+        super(NNCLR_R, self).__init__(X, y, 'DeepConvLSTM')
 
     def get_features(self, X) -> np.ndarray:
         dataloader = setup_dataloader(X, np.zeros(X.shape[0]), self.args)
