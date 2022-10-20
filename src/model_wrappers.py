@@ -376,7 +376,7 @@ class NNCLR(nn.Module):
             criterion="NTXent",
             n_class = np.nanmax(y)+1,
         )
-        if self.args.model_name == "DeepConvLSTM" : self.args.model_name = 'DCL'
+        if backbone == "DeepConvLSTM" : self.args.backbone = 'DCL'
         #Data is channels first
         self.args.len_sw = X.shape[2]
         self.args.n_feature = X.shape[1]
