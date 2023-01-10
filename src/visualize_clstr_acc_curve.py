@@ -155,23 +155,29 @@ avg_delta_acc = [
 
 if __name__ == '__main__':
     
-    # #Plot train vs. test clusterability
-    # plt.figure()
-    # plt.title('Train vs. Test Clusterability', fontsize=14)
-    # for i, set in enumerate(test_clstr.keys()):
-    #     plt.scatter(train_clstr[set], test_clstr[set], c=p[i], marker='.')
-    # plt.xlabel('Train', fontsize=14)
-    # plt.ylabel('Test', fontsize=14)
-    # plt.savefig('imgs/train_v_test_clusterability.pdf')
+    #Plot train vs. test clusterability
+    plt.figure()
+    plt.title('Train vs. Test Clusterability', fontsize=14)
+    for i, set in enumerate(test_clstr.keys()):
+        a, b = np.polyfit(train_clstr[set], test_clstr[set], 1)
+        plt.scatter(train_clstr[set], test_clstr[set], c=p[i], marker='.')
+        plt.plot(train_clstr[set], [a*j+b for j in train_clstr[set]], c=p[i], label=set)
+    plt.xlabel('Train', fontsize=14)
+    plt.ylabel('Test', fontsize=14)
+    plt.legend()
+    plt.savefig('imgs/train_v_test_clusterability.pdf')
 
-    # #Plot train clstr vs. final accuracy
-    # plt.figure()
-    # plt.title("Train Clusterability vs. Accuracy", fontsize=14)
-    # for i, set in enumerate(accuracis.keys()):
-    #     plt.scatter(train_clstr[set], accuracis[set], c=p[i], marker='.')
-    # plt.xlabel('Clusterability', fontsize=14)
-    # plt.ylabel('Accuracy', fontsize=14)
-    # plt.savefig('imgs/train_clusterability_vs_accuracy.pdf')
+    #Plot train clstr vs. final accuracy
+    plt.figure()
+    plt.title("Train Clusterability vs. Accuracy", fontsize=14)
+    for i, set in enumerate(accuracis.keys()):
+        a, b = np.polyfit(train_clstr[set], accuracis[set], 1)
+        plt.scatter(train_clstr[set], accuracis[set], c=p[i], marker='.')
+        plt.plot(train_clstr[set], [a*j+b for j in train_clstr[set]], c=p[i], label=set)
+    plt.xlabel('Clusterability', fontsize=14)
+    plt.ylabel('Accuracy', fontsize=14)
+    plt.legend()
+    plt.savefig('imgs/train_clusterability_vs_accuracy.pdf')
 
     # #Plot test clstr vs. final accuracy
     # plt.figure()
