@@ -155,29 +155,29 @@ avg_delta_acc = [
 
 if __name__ == '__main__':
     
-    #Plot train vs. test clusterability
-    plt.figure()
-    plt.title('Train vs. Test Clusterability', fontsize=14)
-    for i, set in enumerate(test_clstr.keys()):
-        a, b = np.polyfit(train_clstr[set], test_clstr[set], 1)
-        plt.scatter(train_clstr[set], test_clstr[set], c=p[i], marker='.')
-        plt.plot(train_clstr[set], [a*j+b for j in train_clstr[set]], c=p[i], label=set)
-    plt.xlabel('Train', fontsize=14)
-    plt.ylabel('Test', fontsize=14)
-    plt.legend()
-    plt.savefig('imgs/train_v_test_clusterability.pdf')
+    # #Plot train vs. test clusterability
+    # plt.figure()
+    # plt.title('Train vs. Test Clusterability', fontsize=14)
+    # for i, set in enumerate(test_clstr.keys()):
+    #     a, b = np.polyfit(train_clstr[set], test_clstr[set], 1)
+    #     plt.scatter(train_clstr[set], test_clstr[set], c=p[i], marker='.')
+    #     plt.plot(train_clstr[set], [a*j+b for j in train_clstr[set]], c=p[i], label=set)
+    # plt.xlabel('Train', fontsize=14)
+    # plt.ylabel('Test', fontsize=14)
+    # plt.legend()
+    # plt.savefig('imgs/train_v_test_clusterability.pdf')
 
-    #Plot train clstr vs. final accuracy
-    plt.figure()
-    plt.title("Train Clusterability vs. Accuracy", fontsize=14)
-    for i, set in enumerate(accuracis.keys()):
-        a, b = np.polyfit(train_clstr[set], accuracis[set], 1)
-        plt.scatter(train_clstr[set], accuracis[set], c=p[i], marker='.')
-        plt.plot(train_clstr[set], [a*j+b for j in train_clstr[set]], c=p[i], label=set)
-    plt.xlabel('Clusterability', fontsize=14)
-    plt.ylabel('Accuracy', fontsize=14)
-    plt.legend()
-    plt.savefig('imgs/train_clusterability_vs_accuracy.pdf')
+    # #Plot train clstr vs. final accuracy
+    # plt.figure()
+    # plt.title("Train Clusterability vs. Accuracy", fontsize=14)
+    # for i, set in enumerate(accuracis.keys()):
+    #     a, b = np.polyfit(train_clstr[set], accuracis[set], 1)
+    #     plt.scatter(train_clstr[set], accuracis[set], c=p[i], marker='.')
+    #     plt.plot(train_clstr[set], [a*j+b for j in train_clstr[set]], c=p[i], label=set)
+    # plt.xlabel('Clusterability', fontsize=14)
+    # plt.ylabel('Accuracy', fontsize=14)
+    # plt.legend()
+    # plt.savefig('imgs/train_clusterability_vs_accuracy.pdf')
 
     # #Plot test clstr vs. final accuracy
     # plt.figure()
@@ -266,9 +266,9 @@ if __name__ == '__main__':
         t_u_bars.append(averaged_raw_accuracies[f]['Ten Uncleaned'])
         t_c_bars.append(averaged_raw_accuracies[f]['Ten Cleaned'])
 
-    labels = ['Engineered', 'SimCLR+CNN', 'SimCLR+Tran', 'SimCLR+LSTM', 'NNCLR+CNN', 'NNCLR+Tran', 'NNCLR+LSTM', 'Sup. CNN']
+    labels = ['', 'Engineered', 'SimCLR+CNN', 'SimCLR+Tran', 'SimCLR+LSTM', 'NNCLR+CNN', 'NNCLR+Tran', 'NNCLR+LSTM', 'Sup. CNN']
     
-    x = np.arange(len(labels))
+    x = np.arange(len(labels)-1)
     width = 0.15
     fig, ax = plt.subplots()
     
@@ -280,11 +280,12 @@ if __name__ == '__main__':
 
     ax.set_ylabel('Accuracy')
     ax.set_title('Avg Accuracy by Feature Extractor')
-    ax.set_xticks(x, labels)
+    #ax.set_xticks(x, labels)
+    ax.set_xticklabels(labels)
     ax.legend()
     ax.set_ylim([.35, .80])
 
-    plt.setp(ax.get_xticklabels(), rotation=30, ha="right", rotation_mode="anchor")
+    plt.setp(ax.get_xticklabels(), rotation=330, ha="left", rotation_mode="anchor")
 
     fig.tight_layout()
 
