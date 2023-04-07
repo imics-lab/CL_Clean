@@ -111,8 +111,9 @@ def exp_4(
                 return results
             
             labfix_results = check_dataset(f_train, y_train_noisy)
-            sus_indices = labfix_results['indices']
+            sus_indices = np.array(labfix_results['indices'])
             one_p = len(sus_indices) // 100
+            np.save(f'temp/{set}_{extractor}_{noise_level}_sus_indices.npy', sus_indices)
             prec_1p = np.count_nonzero(sus_indices[:one_p] in np.where(y_train_noisy != y_train)) / one_p
             prec_2p = np.count_nonzero(sus_indices[:one_p*2] in np.where(y_train_noisy != y_train)) / one_p*2
             prec_3p = np.count_nonzero(sus_indices[:one_p*3] in np.where(y_train_noisy != y_train)) / one_p*3

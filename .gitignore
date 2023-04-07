@@ -1,0 +1,14 @@
+temp/*
+UCI_HAR*
+UniMiB*
+UCI\ HAR\ Dataset/*
+results/*
+__pycache__
+utils/__pycache__
+__MACOSX
+src/data_preprocess/__pycache__/*
+src/models/__pycache__/*
+src/data_preprocess/__pycache__
+src/labelfix/*
+src/labelfix
+src/labelfix
