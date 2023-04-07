@@ -60,7 +60,14 @@ def exp_4(
         'num mislabeled' : [],
         'prec of labels at 1%' : [],
         'prec of labels at 2%' : [],
-        'prec of labels at 3%' : []
+        'prec of labels at 3%' : [],
+        'prec of labels at 5%' : [],
+        'prec of labels at 10%' : [],
+        'rec of labels at 1%' : [],
+        'rec of labels at 2%' : [],
+        'rec of labels at 3%' : [],
+        'rec of labels at 5%' : [],
+        'rec of labels at 10%' : []
     }
 
     print ("Running Experiment 4  on ", set)
@@ -133,8 +140,16 @@ def exp_4(
             one_p = (len(sus_indices) // 100)
             np.save(f'temp/{set}_{extractor}_{noise_level}_sus_indices.npy', sus_indices)
             prec_1p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p]]) / one_p
-            prec_2p = np.count_nonzero([np.isin(i, mislabeled_indices)  for i in sus_indices[:one_p*2]]) / one_p*2
-            prec_3p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*3]]) / one_p*3
+            prec_2p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*2]]) / (one_p*2)
+            prec_3p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*3]]) / (one_p*3)
+            prec_5p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*5]]) / (one_p*5)
+            prec_10p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*10]]) / (one_p*10)
+
+            rec_1p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p]]) / len(mislabeled_indices)
+            rec_2p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*2]]) / len(mislabeled_indices)
+            rec_3p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*3]]) / len(mislabeled_indices)
+            rec_5p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*5]]) / len(mislabeled_indices)
+            rec_10p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*10]]) / len(mislabeled_indices)
 
             results['set'].append(set)
             results['features'].append(extractor)
@@ -146,4 +161,11 @@ def exp_4(
             results['prec of labels at 1%'].append(prec_1p)
             results['prec of labels at 2%'].append(prec_2p)
             results['prec of labels at 3%'].append(prec_3p)
+            results['prec of labels at 5%'].append(prec_5p)
+            results['prec of labels at 10%'].append(prec_10p)
+            results['rec of labels at 1%'].append(rec_1p)
+            results['rec of labels at 2%'].append(rec_2p)
+            results['rec of labels at 3%'].append(rec_3p)
+            results['rec of labels at 5%'].append(rec_5p)
+            results['rec of labels at 10%'].append(rec_10p)
     return results
