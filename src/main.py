@@ -11,10 +11,12 @@ from cleanup import cleanup
 from load_data_time_series.HAR.e4_wristband_Nov2019.e4_load_dataset import e4_load_dataset
 from load_data_time_series.HAR.UniMiB_SHAR.unimib_shar_adl_load_dataset import unimib_load_dataset
 from load_data_time_series.HAR.UCI_HAR.uci_har_load_dataset import uci_har_load_dataset
+
 from utils.sh_loader import sh_loco_load_dataset
 from experiment1 import exp_1
 from experiment2 import exp_2
-from experiment3 import exp_3
+#from experiment3 import exp_3
+from experiment4 import exp_4
 from utils.gen_ts_data import generate_pattern_data_as_array
 import numpy as np
 import pandas as pd
@@ -22,10 +24,11 @@ import os
 import torch
 import argparse
 
-CLEANUP = True
+CLEANUP = False
 
 parser = argparse.ArgumentParser(description='argument setting of network')
-parser.add_argument('--set', default='sussex huawei', type=str, help='Data Set')
+parser.add_argument('--set', default='twister', type=str, help='Data Set')
+parser.add_argument('--core', default='0', type=int, help='Cuda core')
 
 def channel_swap(X : np.ndarray) -> np.ndarray:
     """
@@ -212,9 +215,10 @@ if __name__ == '__main__':
     #X_test = np.array([scaler.fit_transform(Xi) for Xi in X_test])
 
     ### Run and Write Experiments
-    run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}_{}.csv".format(set, NOW))
-    run_and_write(exp_2, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp2_results_{}_{}.csv".format(set, NOW))
-    run_and_write(exp_3, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp3_results_{}_{}.csv".format(set, NOW))
+    #run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}_{}.csv".format(set, NOW))
+    #run_and_write(exp_2, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp2_results_{}_{}.csv".format(set, NOW))
+    #run_and_write(exp_3, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp3_results_{}_{}.csv".format(set, NOW))
+    run_and_write(exp_4, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp4_results_{}_{}.csv".format(set, NOW))
 
 
     if CLEANUP:

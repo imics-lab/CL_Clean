@@ -88,7 +88,7 @@ def exp_3(
         'accuracy on noisy test' : []
     }
 
-    print ("Running Experiment 2  on ", set)
+    print ("Running Experiment 3  on ", set)
     print("Feature Extractors: ", ', '.join(feature_learners.keys()))
 
     #Load label sets
