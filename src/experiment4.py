@@ -135,7 +135,7 @@ def exp_4(
                                             "activation": "relu"
             })
             num_mislabeled = np.count_nonzero(y_train_noisy != y_train)
-            mislabeled_indices = np.where(y_train_noisy != y_train)
+            mislabeled_indices = np.where(y_train_noisy != y_train)[0]
             sus_indices = np.array(labfix_results['indices'])
             one_p = (len(sus_indices) // 100)
             np.save(f'temp/{set}_{extractor}_{noise_level}_sus_indices.npy', sus_indices)
@@ -145,11 +145,11 @@ def exp_4(
             prec_5p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*5]]) / (one_p*5)
             prec_10p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*10]]) / (one_p*10)
 
-            rec_1p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p]]) / len(mislabeled_indices)
-            rec_2p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*2]]) / len(mislabeled_indices)
-            rec_3p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*3]]) / len(mislabeled_indices)
-            rec_5p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*5]]) / len(mislabeled_indices)
-            rec_10p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*10]]) / len(mislabeled_indices)
+            rec_1p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p]]) / mislabeled_indices.shape[0]
+            rec_2p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*2]]) / mislabeled_indices.shape[0]
+            rec_3p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*3]]) / mislabeled_indices.shape[0]
+            rec_5p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*5]]) / mislabeled_indices.shape[0]
+            rec_10p = np.count_nonzero([np.isin(i, mislabeled_indices) for i in sus_indices[:one_p*10]]) / mislabeled_indices.shape[0]
 
             results['set'].append(set)
             results['features'].append(extractor)
