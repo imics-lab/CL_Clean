@@ -14,14 +14,14 @@ from labelfix.src.labelfix import check_dataset
 from tensorflow import one_hot, make_ndarray
 
 feature_learners = {
-    "traditional" : Engineered_Features,
+    #"traditional" : Engineered_Features,
     #"CAE" : Conv_Autoencoder,
-    "SimCLR + CNN" : SimCLR_C,
-    "SimCLR + T" : SimCLR_T,
-    "SimCLR + LSTM" : SimCLR_R,
-    "NNCLR + CNN" : NNCLR_C,
-    "NNCLR + T" : NNCLR_T,
-    "NNCLR + LSTM" : NNCLR_R,
+    #"SimCLR + CNN" : SimCLR_C,
+    #"SimCLR + T" : SimCLR_T,
+    #"SimCLR + LSTM" : SimCLR_R,
+    #"NNCLR + CNN" : NNCLR_C,
+    #"NNCLR + T" : NNCLR_T,
+    #"NNCLR + LSTM" : NNCLR_R,
     "Supervised Convolutional" : Supervised_C
 }
 

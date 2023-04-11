@@ -27,7 +27,7 @@ import argparse
 CLEANUP = False
 
 parser = argparse.ArgumentParser(description='argument setting of network')
-parser.add_argument('--set', default='twister', type=str, help='Data Set')
+parser.add_argument('--set', default='sussex huawei', type=str, help='Data Set')
 parser.add_argument('--core', default='0', type=int, help='Cuda core')
 
 def channel_swap(X : np.ndarray) -> np.ndarray:
@@ -215,8 +215,8 @@ if __name__ == '__main__':
     #X_test = np.array([scaler.fit_transform(Xi) for Xi in X_test])
 
     ### Run and Write Experiments
-    #run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}_{}.csv".format(set, NOW))
-    #run_and_write(exp_2, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp2_results_{}_{}.csv".format(set, NOW))
+    run_and_write(exp_1, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp1_results_{}_{}.csv".format(set, NOW))
+    run_and_write(exp_2, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp2_results_{}_{}.csv".format(set, NOW))
     #run_and_write(exp_3, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp3_results_{}_{}.csv".format(set, NOW))
     run_and_write(exp_4, X_train, y_train, X_val, y_val, X_test, y_test, set, "results/exp4_results_{}_{}.csv".format(set, NOW))
 
